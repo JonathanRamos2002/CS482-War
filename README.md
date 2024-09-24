@@ -1,3 +1,3 @@
 # CS482-TeamAssignment1
 
-User Stories: https://studentsloyola-my.sharepoint.com/:x:/r/personal/aolu-bamisaye_loyola_edu/Documents/user_stories_template.ods?d=w7976915dd9c8433e95118d13b12ad84b&csf=1&web=1&e=bvX7Nf
+User Stories: https://studentsloyola-my.sharepoint.com/:x:/r/personal/jiramosromero_loyola_edu/Documents/Loyola%20University/war_user_stories.xlsx?d=w00b31085c766480c9ac25c13f4ffe9ae&csf=1&web=1&e=PPgW8H
