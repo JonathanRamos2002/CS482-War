@@ -7,7 +7,7 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCYITdhyPNQpmNivDuF8KB5X96ujFlnArQ",
+  apiKey: "",
   authDomain: "cosmic-war-61067.firebaseapp.com",
   projectId: "cosmic-war-61067",
   storageBucket: "cosmic-war-61067.appspot.com",
