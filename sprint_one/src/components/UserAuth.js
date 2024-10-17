@@ -5,26 +5,31 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswor
 
 
 
-const UserAuth = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  // This is helpful with the transition between login and sign up
+const UserAuth = ({ onLogin }) => {
+  
+  // This is needed to transition between login and sign up
   const [isSigningUp, setIsSigningUp] = useState(false); 
   const [isResettingPassword, setIsResettingPassword] = useState(false); 
 
+  // Store the email and password respectively 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
-// TODO: @Brett here should go the functionality to login with firebase
-  const handleLogin = async (event) => {
-    event.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log('User logged in:', email);
-    } catch (error){
-      console.log('Error logging in:', error.message);
-    }
+
+  const handleLogin = () => {
+    //TODO: @Brett here should go the functionality to log in with firebase
+    console.log('User signed in:', email)
+    onLogin(); 
+  }
+
+  const handleSignUp = () => {
+    //TODO: @Brett here should go the functionality to sign up with firebase
+    console.log('User signed up:', email);
+    onLogin();
   };
 
 
+<<<<<<< HEAD
 // TODO: @Brett here should go the functionality to sign up with firebase
   const handleSignUp = async (event) => {
     event.preventDefault();
@@ -46,6 +51,8 @@ const UserAuth = () => {
     }
   }
 
+=======
+>>>>>>> b3d02fcd8d1fc07dc21aa514851c671875f1f7f9
   // HTML (front-end) is working
   return (
     <section className="auth-container">
