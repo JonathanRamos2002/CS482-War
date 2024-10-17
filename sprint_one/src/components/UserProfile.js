@@ -2,10 +2,13 @@ import React, { useState } from 'react';
 
 function UserProfile({ onLogout }) {
   // needed for testing
+  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
+  console.log(placeholder)
+
   const [user, setUser] = useState({
     email: 'user@test.com',
     password: 'mypassword',
-    avatar: '../images/Guest-Avatar.jpg',
+    avatar: placeholder,
   })
 
   const [selectedImage, setSelectedImage] = useState(null);
@@ -33,13 +36,15 @@ function UserProfile({ onLogout }) {
         <span>{user.email}</span>
       </div>
       <p>You are now logged into your Cosmic Radiance profile.</p>
-      
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
-      <p>upload a new picture</p>
+     
+      <div className="input-and-button">
+        <p>upload a new picture</p>
+        <input type="file" accept="image/*" onChange={handleImageUpload} />
+        <button className="cosmic-button" onClick={onLogout}>
+          Log Out
+        </button>
+      </div> 
 
-      <button className="cosmic-button" onClick={onLogout}>
-        Log Out
-      </button>
     </div>
   );
 
