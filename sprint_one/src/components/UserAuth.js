@@ -52,14 +52,13 @@ const UserAuth = ({ onLogin }) => {
               id="reset-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="Email"
               required
             />
-            <button type="submit" className="cosmic-button">Send Password Reset Email</button>
+            <button type="submit" className="cosmic-button">Reset Password</button>
             <button
-              className="switch-button"
-              onClick={() => setIsResettingPassword(false)}
-            >
+              className="return-login"
+              onClick={() => setIsResettingPassword(false)}>
               Back to Login
             </button>
           </form>
