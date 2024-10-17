@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import {auth} from './firebase';
 import UserAuth from './components/UserAuth';
 import UserProfile from './components/UserProfile';
 import Lobby from './components/Lobby'; // Import the Lobby component
@@ -6,15 +7,21 @@ import './styles.css';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
 
   const handleLogin = () => {
     setIsLoggedIn(true);
-    //TODO: @Brett, User Story 3
-  }
+    const currentUser = auth.currentUser;
+    if (currentUser) {
+      setUser(currentUser);
+    }
+  };
 
   const handleLogout = () => {
     setIsLoggedIn(false);
-    //TODO: @Ayo, User Story 4
+    auth.signOut().then(() => { 
+      setUser(null);
+    });
   };
 
   return (
@@ -24,7 +31,7 @@ function App() {
       </header>
 
       <main>
-        {isLoggedIn ? (<UserProfile onLogout={() => setIsLoggedIn(false)}/>) : (<UserAuth onLogin={() => setIsLoggedIn(true)}/>)}
+        {user ? (<UserProfile user={user} setUser={setUser} onLogout={handleLogout}/>) : (<UserAuth onLogin={handleLogin}/>)}
       </main>
 
       <footer>
