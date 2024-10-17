@@ -1,22 +1,51 @@
 import React, { useState } from 'react';
+import {storage} from '../firebase';
+import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
+
 
 function UserProfile({user, setUser, onLogout}) {
-  // needed for testing
   const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
+  const [selectedImage, setSelectedImage] = useState(placeholder);
+  const [uploading, setUploading] = useState(false);
+  const [imageFetched, setImageFetched] = useState(false);
 
-  const [selectedImage, setSelectedImage] = useState(null);
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0]
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImage(reader.result);
-        setUser((prevUser) => ({...prevUser, avatar: reader.result}));
+  const fetchProfileImage = async () => {
+    if(!imageFetched) { 
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      try {
+        const url = await getDownloadURL(storageRef);
+        setSelectedImage(url);
+        setImageFetched(true);
+      } catch (error) {
+        console.log('avatar not found, using placeholder:', error.message);
       }
-      reader.readAsDataURL(file)
+    }
+  };
+
+  fetchProfileImage();
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploading(true);
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      try {
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        setSelectedImage(downloadURL);
+        setUser((prevUser) => ({
+          ...prevUser, 
+          avatar: downloadURL,
+        }));
+      } catch (error) {
+        console.error('error uploading image:', error.message);
+      } finally {
+        setUploading(false); // Uploading failed completely
+      }
+
     }
   }
+
 
   // onLogout functionality is handled in App.js
   // The function is received from App.js to UserProfile.js
@@ -25,7 +54,7 @@ function UserProfile({user, setUser, onLogout}) {
     <div className="profile-container">
       <h1>Welcome,</h1>
       <div className="user-info">
-        <img src={selectedImage || user.avatar} alt="User Avatar" className="avatar" />
+        <img src={selectedImage} alt="User Avatar" className="avatar" />
         <span>{user.email}</span>
       </div>
       <p>You are now logged into your Cosmic Radiance profile.</p>
@@ -33,6 +62,7 @@ function UserProfile({user, setUser, onLogout}) {
       <div className="input-and-button">
         <p>upload a new picture</p>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
+        {uploading && <p>uploading...</p>}
         <button className="cosmic-button" onClick={onLogout}>
           Log Out
         </button>
