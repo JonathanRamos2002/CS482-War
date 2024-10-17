@@ -1,40 +1,41 @@
-// src/components/UserAuth.js
 import React, { useState } from 'react';
 import { auth } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
+const UserAuth = ({ onLogin, onGuestLogin }) => {
+  // Transition between login and sign up
+  const [isSigningUp, setIsSigningUp] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
-
-const UserAuth = ({ onLogin }) => {
-  
-  // This is needed to transition between login and sign up
-  const [isSigningUp, setIsSigningUp] = useState(false); 
-  const [isResettingPassword, setIsResettingPassword] = useState(false); 
-
-  // Store the email and password respectively 
+  // Store the email and password respectively
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
 
-
   const handleLogin = async (event) => {
-    //TODO: @Brett here should go the functionality to log in with firebase
     event.preventDefault();
-    try{
+    try {
       await signInWithEmailAndPassword(auth, email, password);
+<<<<<<< HEAD
       const user = auth.currentUser;
+=======
+      console.log('User signed in:', email);
+>>>>>>> 42f6c74 (no idea what im pushing)
       onLogin();
-    } catch(error) {
-      console.error('Error loggin in: ', error.message);
+    } catch (error) {
+      console.error('Error logging in:', error.message);
       setError(error.message);
     }
-  }
+  };
 
   const handleSignUp = async (event) => {
-    //TODO: @Brett here should go the functionality to sign up with firebase
     event.preventDefault();
-    try{
+    try {
       await createUserWithEmailAndPassword(auth, email, password);
+<<<<<<< HEAD
+=======
+      console.log('User signed up:', email);
+>>>>>>> 42f6c74 (no idea what im pushing)
       onLogin();
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
@@ -46,6 +47,28 @@ const UserAuth = ({ onLogin }) => {
     }
   };
 
+  // Function to generate guest username
+  const generateGuestUsername = () => {
+    const randomNum = Math.floor(10000 + Math.random() * 90000); // Generate 5 random digits
+    return `guest${randomNum}`;
+  };
+
+  // Handle guest login (no Firebase)
+  const handleGuestLogin = () => {
+    const guestUsername = generateGuestUsername();
+    alert(`You are playing as: ${guestUsername}`); // Display guest username in a pop-up
+    if (onGuestLogin) {
+      onGuestLogin(guestUsername); // Optional: Handle guest login in the parent component
+    }
+  };
+
+  const renderGuestButton = () => {
+    return (
+      <button className="cosmic-button" onClick={handleGuestLogin}>
+        Play as Guest
+      </button>
+    );
+  };
 
   const handleForgotPassword = async (event) => {
     event.preventDefault();
@@ -56,9 +79,8 @@ const UserAuth = ({ onLogin }) => {
     } catch (error) {
       console.error('Error sending password reset email:', error.message);
     }
-  }
+  };
 
-  // HTML (front-end) is working
   return (
     <section className="auth-container">
       {isResettingPassword ? (
@@ -70,13 +92,11 @@ const UserAuth = ({ onLogin }) => {
               id="reset-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
+              placeholder="Enter your email"
               required
             />
             <button type="submit" className="cosmic-button">Reset Password</button>
-            <button
-              className="return-login"
-              onClick={() => setIsResettingPassword(false)}>
+            <button className="return-login" onClick={() => setIsResettingPassword(false)}>
               Back to Login
             </button>
           </form>
@@ -105,22 +125,17 @@ const UserAuth = ({ onLogin }) => {
               {isSigningUp ? 'Sign Up' : 'Log In'}
             </button>
           </form>
+          {renderGuestButton()}
           {!isSigningUp && (
             <p>
-              <button
-                className="switch-button"
-                onClick={() => setIsResettingPassword(true)}
-              >
+              <button className="switch-button" onClick={() => setIsResettingPassword(true)}>
                 Forgot Password?
               </button>
             </p>
           )}
           <p>
             {isSigningUp ? "Already have an account? " : "Don't have an account? "}
-            <button
-              className="switch-button"
-              onClick={() => setIsSigningUp(!isSigningUp)}
-            >
+            <button className="switch-button" onClick={() => setIsSigningUp(!isSigningUp)}>
               {isSigningUp ? "Log in here" : "Sign up now"}
             </button>
           </p>
