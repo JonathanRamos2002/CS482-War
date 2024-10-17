@@ -22,7 +22,7 @@ const UserAuth = ({ onLogin }) => {
     event.preventDefault();
     try{
       await signInWithEmailAndPassword(auth, email, password);
-      console.log('User signed in: ', email);
+      const user = auth.currentUser;
       onLogin();
     } catch(error) {
       console.error('Error loggin in: ', error.message);
@@ -35,7 +35,6 @@ const UserAuth = ({ onLogin }) => {
     event.preventDefault();
     try{
       await createUserWithEmailAndPassword(auth, email, password);
-      console.log('User signed up: ', email);
       onLogin();
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {

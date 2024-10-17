@@ -1,15 +1,8 @@
 import React, { useState } from 'react';
 
-function UserProfile({ onLogout }) {
+function UserProfile({user, setUser, onLogout}) {
   // needed for testing
   const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
-  console.log(placeholder)
-
-  const [user, setUser] = useState({
-    email: 'user@test.com',
-    password: 'mypassword',
-    avatar: placeholder,
-  })
 
   const [selectedImage, setSelectedImage] = useState(null);
 
