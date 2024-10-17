@@ -129,6 +129,67 @@ form input::placeholder {
     margin-top: 50px;
 }
 
+/* Profile Container Styling */
+.profile-container {
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  padding: 40px;
+  margin: auto;
+  margin-top: 50px;
+}
+
+.profile-container h1 {
+  color: #4f83ff;
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+.profile-container p {
+  font-size: 1.2em;
+  margin-bottom: 30px;
+  color: #b9d6ff;
+}
+
+input[type="file"] {
+    margin-top: 20px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 2px solid #4f83ff;
+    background-color: rgba(0,0,0,0.6);
+    color: white;
+}
+
+.profile-container {
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    background-color: rgba(0,0,0,0.7);
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 2px solid #4f83ff;
+    margin: auto;
+    margin-top: 50px;
+    color: white;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+}
+
+
 footer {
     margin-top: 30px;
     font-family: 'Orbitron', sans-serif;

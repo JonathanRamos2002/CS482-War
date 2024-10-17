@@ -1,8 +1,21 @@
-import React from 'react';
+import React, {useState} from 'react';
 import UserAuth from './components/UserAuth';
+import UserProfile from './components/UserProfile';
 import './styles.css';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    //TODO: @Brett, User Story 3
+  }
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    //TODO: @Ayo, User Story 4
+  }
+
   return (
     <div className="container">
       <header>
@@ -10,7 +23,7 @@ function App() {
       </header>
 
       <main>
-        {<UserAuth />}
+        {isLoggedIn ? (<UserProfile onLogout={() => setIsLoggedIn(false)}/>) : (<UserAuth onLogin={() => setIsLoggedIn(true)}/>)}
       </main>
 
       <footer>
