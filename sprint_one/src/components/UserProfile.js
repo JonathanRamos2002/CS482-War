@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 function UserProfile({ onLogout }) {
   // needed for testing
   const [user, setUser] = useState({
-    email: 'user@example.com',
+    email: 'user@test.com',
     password: 'mypassword',
     avatar: '../images/Guest-Avatar.jpg',
   })
