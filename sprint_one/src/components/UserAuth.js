@@ -29,16 +29,6 @@ const UserAuth = ({ onLogin }) => {
   };
 
 
-// TODO: @Brett here should go the functionality to sign up with firebase
-  const handleSignUp = async (event) => {
-    event.preventDefault();
-    try {
-      await createUserWithEmailAndPassword(auth, email, password)
-      console.log('User signed up:', email);
-    } catch(error) {
-      console.error('Error signing up:', error.message);
-    }
-  };
   const handleForgotPassword = async (event) => {
     event.preventDefault();
     try {
@@ -50,8 +40,6 @@ const UserAuth = ({ onLogin }) => {
     }
   }
 
-=======
->>>>>>> b3d02fcd8d1fc07dc21aa514851c671875f1f7f9
   // HTML (front-end) is working
   return (
     <section className="auth-container">
