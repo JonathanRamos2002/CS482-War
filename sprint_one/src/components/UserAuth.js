@@ -29,7 +29,6 @@ const UserAuth = ({ onLogin }) => {
   };
 
 
-<<<<<<< HEAD
 // TODO: @Brett here should go the functionality to sign up with firebase
   const handleSignUp = async (event) => {
     event.preventDefault();
