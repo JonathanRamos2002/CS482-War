@@ -19,4 +19,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
+<<<<<<< HEAD
 const auth = getAuth(app);         // Firebase Authentication
+=======
+>>>>>>> a91e934 (merge)
