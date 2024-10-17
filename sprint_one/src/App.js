@@ -1,22 +1,16 @@
 import React from 'react';
-import SignUp from './components/SignUp';
-import Login from './components/Login';
-import UserProfile from './components/UserProfile';
+import UserAuth from './components/UserAuth';
 import './styles.css';
 
 function App() {
   return (
     <div className="container">
       <header>
-        <h1>Cosmic Radiance War</h1>
-        <p className="tagline">Conquer the Galaxy!</p>
+        <h1>Cosmic Radiance</h1>
       </header>
 
       <main>
-        {/* You can toggle between Login and SignUp components */}
-	{<Login />}
-        {/*<SignUp />*/}
-        {/* <UserProfile /> */}
+        {<UserAuth />}
       </main>
 
       <footer>
@@ -25,7 +19,7 @@ function App() {
         <a href="#">Contact Galactic Support</a>
       </footer>
     </div>
-  );
+  )
 }
 
 export default App;
