@@ -14,18 +14,37 @@ const UserAuth = ({ onLogin }) => {
   // Store the email and password respectively 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
 
 
-  const handleLogin = () => {
+  const handleLogin = async (event) => {
     //TODO: @Brett here should go the functionality to log in with firebase
-    console.log('User signed in:', email)
-    onLogin(); 
+    event.preventDefault();
+    try{
+      await signInWithEmailAndPassword(auth, email, password);
+      console.log('User signed in: ', email);
+      onLogin();
+    } catch(error) {
+      console.error('Error loggin in: ', error.message);
+      setError(error.message);
+    }
   }
 
-  const handleSignUp = () => {
+  const handleSignUp = async (event) => {
     //TODO: @Brett here should go the functionality to sign up with firebase
-    console.log('User signed up:', email);
-    onLogin();
+    event.preventDefault();
+    try{
+      await createUserWithEmailAndPassword(auth, email, password);
+      console.log('User signed up: ', email);
+      onLogin();
+    } catch (error) {
+      if (error.code === 'auth/email-already-in-use') {
+        console.error('This email is already in use. Please log in instead.');
+        setError('This email is already in use. Please log in instead.');
+      }
+      console.error('Error signing up: ', error.message);
+      setError(error.message);
+    }
   };
 
 
