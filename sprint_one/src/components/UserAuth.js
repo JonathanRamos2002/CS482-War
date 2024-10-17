@@ -16,11 +16,8 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
     event.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-<<<<<<< HEAD
       const user = auth.currentUser;
-=======
       console.log('User signed in:', email);
->>>>>>> 42f6c74 (no idea what im pushing)
       onLogin();
     } catch (error) {
       console.error('Error logging in:', error.message);
@@ -32,10 +29,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
     event.preventDefault();
     try {
       await createUserWithEmailAndPassword(auth, email, password);
-<<<<<<< HEAD
-=======
       console.log('User signed up:', email);
->>>>>>> 42f6c74 (no idea what im pushing)
       onLogin();
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
