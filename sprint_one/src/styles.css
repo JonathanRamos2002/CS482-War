@@ -108,13 +108,16 @@ form input::placeholder {
     background-color: #1c2f6a;
 }
 
-.switch-button {
+.return-login, .switch-button {
     background: none;
     border: none;
     color: #4f83ff;
     font-size: 1em;
     cursor: pointer;
-    padding: 0;
+}
+
+.return-login {
+    padding: 20px;
 }
 
 .switch-button:hover {
@@ -131,28 +134,27 @@ form input::placeholder {
 
 /* Profile Container Styling */
 .profile-container {
-  text-align: center;
-  width: 100%;
-  max-width: 600px;
-  padding: 40px;
-  margin: auto;
-  margin-top: 50px;
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    padding: 40px;
+    margin: auto;
+    margin-top: 50px;
 }
 
 .profile-container h1 {
-  color: #4f83ff;
-  font-size: 2.5em;
-  margin-bottom: 20px;
+    color: #4f83ff;
+    font-size: 2.5em;
+    margin-bottom: 20px;
 }
 
 .profile-container p {
-  font-size: 1.2em;
-  margin-bottom: 30px;
-  color: #b9d6ff;
+    font-size: 1.2em;
+    margin-bottom: 30px;
+    color: #b9d6ff;
 }
 
 input[type="file"] {
-    margin-top: 20px;
     padding: 10px;
     border-radius: 5px;
     border: 2px solid #4f83ff;
@@ -164,11 +166,7 @@ input[type="file"] {
     text-align: center;
     width: 100%;
     max-width: 600px;
-    background-color: rgba(0,0,0,0.7);
     padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    border: 2px solid #4f83ff;
     margin: auto;
     margin-top: 50px;
     color: white;
@@ -189,6 +187,12 @@ input[type="file"] {
     object-fit: cover;
 }
 
+.input-and-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 
 footer {
     margin-top: 30px;
