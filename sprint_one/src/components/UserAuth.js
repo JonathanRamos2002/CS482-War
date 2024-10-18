@@ -10,18 +10,15 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   // Store the email and password respectively
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
 
   const handleLogin = async (event) => {
     event.preventDefault();
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      const user = auth.currentUser;
       console.log('User signed in:', email);
       onLogin();
     } catch (error) {
       console.error('Error logging in:', error.message);
-      setError(error.message);
     }
   };
 
@@ -34,10 +31,8 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
         console.error('This email is already in use. Please log in instead.');
-        setError('This email is already in use. Please log in instead.');
       }
       console.error('Error signing up: ', error.message);
-      setError(error.message);
     }
   };
 

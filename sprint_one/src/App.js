@@ -2,15 +2,13 @@ import React, {useState} from 'react';
 import {auth} from './firebase';
 import UserAuth from './components/UserAuth';
 import UserProfile from './components/UserProfile';
-import Lobby from './components/Lobby'; // Import the Lobby component
+//import Lobby from './components/Lobby'; // Import the Lobby component
 import './styles.css';
 
 function App() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
 
   const handleLogin = () => {
-    setIsLoggedIn(true);
     const currentUser = auth.currentUser;
     if (currentUser) {
       setUser(currentUser);
@@ -18,7 +16,6 @@ function App() {
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
     auth.signOut().then(() => { 
       setUser(null);
     });
