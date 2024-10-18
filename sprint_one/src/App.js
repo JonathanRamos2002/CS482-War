@@ -2,6 +2,8 @@ import React, {useState} from 'react';
 import {auth} from './firebase';
 import UserAuth from './components/UserAuth';
 import UserProfile from './components/UserProfile';
+import AddFriend from './components/AddFriend';
+import FriendsList from './components/FriendsList';
 //import Lobby from './components/Lobby'; // Import the Lobby component
 import './styles.css';
 
@@ -28,7 +30,15 @@ function App() {
       </header>
 
       <main>
-        {user ? (<UserProfile user={user} setUser={setUser} onLogout={handleLogout}/>) : (<UserAuth onLogin={handleLogin}/>)}
+        {user ? (
+          <div>
+            <UserProfile user={user} setUser={setUser} onLogout={handleLogout} /> 
+            <AddFriend currentUser={user} />
+            <FriendsList currentUser={user} />
+          </div>
+        ) : (
+          <UserAuth onLogin={handleLogin}/>
+        )}
       </main>
 
       <footer>

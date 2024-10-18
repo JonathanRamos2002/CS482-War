@@ -63,7 +63,7 @@ function UserProfile({user, setUser, onLogout}) {
         <p>upload a new picture</p>
         <input type="file" accept="image/*" onChange={handleImageUpload} />
         {uploading && <p>uploading...</p>}
-        <button className="cosmic-button" onClick={onLogout}>
+        <button className="edit-profile-button" onClick={onLogout}>
           Log Out
         </button>
       </div> 

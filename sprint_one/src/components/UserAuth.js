@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import {setDoc, doc} from 'firebase/firestore';
+import {ref, getStorage, getDownloadURL} from 'firebase/storage';
 
 const UserAuth = ({ onLogin, onGuestLogin }) => {
   // Transition between login and sign up
@@ -10,6 +12,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   // Store the email and password respectively
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -25,7 +28,26 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   const handleSignUp = async (event) => {
     event.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userRef = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userRef.user;
+ 
+      const avatarPath = `avatars/${user.uid}`;
+      let avatar = placeholder;
+
+      const imageRef = ref(getStorage(), avatarPath);
+      try{
+        avatar = await getDownloadURL(imageRef);
+      } catch (error) {
+        console.log('avatar not found, using placeholder image')
+      }
+
+      await setDoc(doc(db, 'users', user.uid), {
+        email: user.email,
+        username: email.split('@')[0],
+        avatar: avatar,
+        friends: [],
+      });
+       
       console.log('User signed up:', email);
       onLogin();
     } catch (error) {
