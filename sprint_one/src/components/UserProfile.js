@@ -46,28 +46,43 @@ function UserProfile({user, setUser, onLogout}) {
     }
   }
 
+  const handleUsernameChange = () => {
+    console.log('implement username updating here')
+  }
+
 
   // onLogout functionality is handled in App.js
   // The function is received from App.js to UserProfile.js
 
   return (
     <div className="profile-container">
-      <h1>Welcome,</h1>
+      <h1>Welcome, {user.username || 'User'} !</h1>
       <div className="user-info">
         <img src={selectedImage} alt="User Avatar" className="avatar" />
-        <span>{user.email}</span>
+        <div className="user-details">
+          <span>Email: {user.email}</span>
+          <span>Username: {user.username || 'N/A'}</span>
+        </div>
       </div>
+
       <p>You are now logged into your Cosmic Radiance profile.</p>
      
-      <div className="input-and-button">
-        <p>upload a new picture</p>
-        <input type="file" accept="image/*" onChange={handleImageUpload} />
-        {uploading && <p>uploading...</p>}
-        <button className="edit-profile-button" onClick={onLogout}>
-          Log Out
-        </button>
-      </div> 
+      <div className="upload-section">
+        <h2>Upload a New Picture</h2>
+        <input type ="file" accept="image/*" onChange={handleImageUpload} />
+        {uploading && <p>Uploading...</p>}
+      </div>
 
+      <div className="friends-section">
+      <h2>Your Friends</h2>
+        <button className="view-friends-button">View Friends</button>
+        {/* Render friends list here if needed */}
+      </div>
+
+
+      <button className="edit-profile-button" onClick={onLogout}>
+        Log Out
+      </button>
     </div>
   );
 

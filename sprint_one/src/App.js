@@ -31,13 +31,24 @@ function App() {
 
       <main>
         {user ? (
-          <div>
-            <UserProfile user={user} setUser={setUser} onLogout={handleLogout} /> 
-            <AddFriend currentUser={user} />
-            <FriendsList currentUser={user} />
+          <div className="user-profile-container">
+            {/* User Profile Section */}
+            <div className="user-profile-section">
+              <UserProfile user={user} setUser={setUser} onLogout={handleLogout} />
+            </div>
+
+            {/* Add Friend Section */}
+            <div className="add-friend-section">
+              <AddFriend currentUser={user} />
+            </div>
+
+            {/* Friends List Section */}
+            <div className="friends-list-section">
+              <FriendsList currentUser={user} />
+            </div>
           </div>
         ) : (
-          <UserAuth onLogin={handleLogin}/>
+          <UserAuth onLogin={handleLogin} />
         )}
       </main>
 
