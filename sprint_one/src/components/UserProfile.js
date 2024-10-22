@@ -154,30 +154,22 @@ function UserProfile({user, setUser, onLogout}) {
 
       {/* TODO : Ayo logout functionality */}
       {isConfirming ? (
-      <div className="logout-confirmation">
-        <p>Are you sure you want to log out?</p>
-        <button onClick={onLogout} className="confirm-logout-button">Yes, Log Out</button>
-        <button onClick={() => setIsConfirming(false)} className="cancel-logout-button">Cancel</button>
-      </div>
-    ) : (
-      <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
-      {/* TODO : Ayo logout functionality */}
-      {isConfirming ? (
-      <div className="logout-confirmation">
-        <p>Are you sure you want to log out?</p>
-        <button onClick={onLogout} className="confirm-logout-button">Yes, Log Out</button>
-        <button onClick={() => setIsConfirming(false)} className="cancel-logout-button">Cancel</button>
-      </div>
-    ) : (
-      <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
-        Log Out
-      </button>
-    )}
-    )}
+        <div className="logout-confirmation">
+          <p>Are you sure you want to log out?</p>
+          <button onClick={onLogout} className="confirm-logout-button">
+            Yes, Log Out
+          </button>
+          <button onClick={() => setIsConfirming(false)} className="cancel-logout-button">
+            Cancel
+          </button>
+        </div>
+      ) : (
+        <button className="logout-button" onClick={() => setIsConfirming(true)}>
+          Log Out
+        </button>
+      )}
     </div>
   );
-
 }
-
 
 export default UserProfile;
