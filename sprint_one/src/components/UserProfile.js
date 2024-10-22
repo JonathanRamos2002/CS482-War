@@ -8,8 +8,11 @@ function UserProfile({user, setUser, onLogout}) {
   const [selectedImage, setSelectedImage] = useState(placeholder);
   const [uploading, setUploading] = useState(false);
   const [imageFetched, setImageFetched] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [newUsername, setNewUsername] = useState(user.username || '');
+  const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
-  const [isConfirming, setIsConfirming] = useState(false)
 
   const fetchProfileImage = async () => {
     if(!imageFetched) { 
@@ -53,11 +56,23 @@ function UserProfile({user, setUser, onLogout}) {
 
     }
   }
+  
+ 
+  const handleProfileUpdate = (e) => {
+    e.preventDefault();
+    setUser((prevUser) => ({
+      ...prevUser,
+      username: newUsername,
+      email: newEmail,
+    }));
+    setIsEditing(false);
+  };
 
-  const handleUsernameChange = () => {
-    console.log('implement username updating here')
-  }
-
+  const handleCancelEdit = () => {
+    setNewUsername(user.username || '');
+    setNewEmail(user.email || '');
+    setIsEditing(false);
+  };
 
   // onLogout functionality is handled in App.js
   // The function is received from App.js to UserProfile.js
@@ -80,6 +95,56 @@ function UserProfile({user, setUser, onLogout}) {
         <input type ="file" accept="image/*" onChange={handleImageUpload} />
         {uploading && <p>Uploading...</p>}
       </div>
+      {/* TODO : Ayo update profile functionality */}
+      <div className="profile-update-section">
+        {!isEditing ? (
+          <button 
+            className="edit-profile-button"
+            onClick={() => setIsEditing(true)}
+          >
+            Update Profile
+          </button>
+        ) : (
+          <div className="edit-profile-form">
+            <h2>Update Your Profile</h2>
+            <form onSubmit={handleProfileUpdate}>
+              <div className="form-group">
+                <label htmlFor="username"> Username:</label>
+                <input
+                  type="text"
+                  id="username"
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  placeholder="Enter new username"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="email">Email:</label>
+                <input
+                  type="email"
+                  id="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="Enter new email"
+                />
+              </div>
+              <div className="button-group">
+                <button type="submit" className="save-button">
+                  Save Changes
+                </button>
+                <button 
+                  type="button" 
+                  className="cancel-button"
+                  onClick={handleCancelEdit}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+
 
       <div className="friends-section">
       <h2>Your Friends</h2>
@@ -96,8 +161,18 @@ function UserProfile({user, setUser, onLogout}) {
       </div>
     ) : (
       <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
+      {/* TODO : Ayo logout functionality */}
+      {isConfirming ? (
+      <div className="logout-confirmation">
+        <p>Are you sure you want to log out?</p>
+        <button onClick={onLogout} className="confirm-logout-button">Yes, Log Out</button>
+        <button onClick={() => setIsConfirming(false)} className="cancel-logout-button">Cancel</button>
+      </div>
+    ) : (
+      <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
         Log Out
       </button>
+    )}
     )}
     </div>
   );
