@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import {storage} from '../firebase';
 import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
-
+import {getFirestore, doc, updateDoc} from 'firebase/firestore';
 
 function UserProfile({user, setUser, onLogout}) {
   const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
   const [selectedImage, setSelectedImage] = useState(placeholder);
   const [uploading, setUploading] = useState(false);
   const [imageFetched, setImageFetched] = useState(false);
+  const db = getFirestore();
 
   const fetchProfileImage = async () => {
     if(!imageFetched) { 
@@ -37,6 +38,12 @@ function UserProfile({user, setUser, onLogout}) {
           ...prevUser, 
           avatar: downloadURL,
         }));
+
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          avatar: downloadURL
+        });
+
       } catch (error) {
         console.error('error uploading image:', error.message);
       } finally {
@@ -61,7 +68,7 @@ function UserProfile({user, setUser, onLogout}) {
         <img src={selectedImage} alt="User Avatar" className="avatar" />
         <div className="user-details">
           <span>Email: {user.email}</span>
-          <span>Username: {user.username || 'N/A'}</span>
+          <span>Username: {user.username}</span>
         </div>
       </div>
 
@@ -72,13 +79,6 @@ function UserProfile({user, setUser, onLogout}) {
         <input type ="file" accept="image/*" onChange={handleImageUpload} />
         {uploading && <p>Uploading...</p>}
       </div>
-
-      <div className="friends-section">
-      <h2>Your Friends</h2>
-        <button className="view-friends-button">View Friends</button>
-        {/* Render friends list here if needed */}
-      </div>
-
 
       <button className="edit-profile-button" onClick={onLogout}>
         Log Out
