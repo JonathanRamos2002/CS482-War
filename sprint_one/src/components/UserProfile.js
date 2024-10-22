@@ -8,6 +8,7 @@ function UserProfile({user, setUser, onLogout}) {
   const [selectedImage, setSelectedImage] = useState(placeholder);
   const [uploading, setUploading] = useState(false);
   const [imageFetched, setImageFetched] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false)
 
   const fetchProfileImage = async () => {
     if(!imageFetched) { 
@@ -79,10 +80,18 @@ function UserProfile({user, setUser, onLogout}) {
         {/* Render friends list here if needed */}
       </div>
 
-
-      <button className="edit-profile-button" onClick={onLogout}>
+      {/* TODO : Ayo logout functionality */}
+      {isConfirming ? (
+      <div className="logout-confirmation">
+        <p>Are you sure you want to log out?</p>
+        <button onClick={onLogout} className="confirm-logout-button">Yes, Log Out</button>
+        <button onClick={() => setIsConfirming(false)} className="cancel-logout-button">Cancel</button>
+      </div>
+    ) : (
+      <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
         Log Out
       </button>
+    )}
     </div>
   );
 
