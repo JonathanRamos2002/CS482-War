@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import {setDoc, doc} from 'firebase/firestore';
-import {ref, getStorage, getDownloadURL} from 'firebase/storage';
+import { setDoc, doc } from 'firebase/firestore';
+import { ref, getStorage, getDownloadURL } from 'firebase/storage';
 
 const UserAuth = ({ onLogin, onGuestLogin }) => {
-  // Transition between login and sign up
   const [isSigningUp, setIsSigningUp] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-
-  // Store the email and password respectively
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestUsername, setGuestUsername] = useState('');
+  const [guestAvatar, setGuestAvatar] = useState('');
+
+  const placeholder = `${process.env.PUBLIC_URL}/images/Guest-Avatar.jpg`;
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -21,24 +22,31 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
       console.log('User signed in:', email);
       onLogin();
     } catch (error) {
-      console.error('Error logging in:', error.message);
+      console.error('Error during login:', error);
+      // Check error codes for incorrect password or user not found
+      if (error.code === 'auth/wrong-password') {
+        alert('Incorrect password. Please try again.');
+      } else {
+        console.error('Error logging in:', error.message);
+        alert('Error logging in. Please check your credentials.');
+      }
     }
   };
-
+  
   const handleSignUp = async (event) => {
     event.preventDefault();
     try {
       const userRef = await createUserWithEmailAndPassword(auth, email, password);
       const user = userRef.user;
- 
+
       const avatarPath = `avatars/${user.uid}`;
       let avatar = placeholder;
 
       const imageRef = ref(getStorage(), avatarPath);
-      try{
+      try {
         avatar = await getDownloadURL(imageRef);
       } catch (error) {
-        console.log('avatar not found, using placeholder image')
+        console.log('Avatar not found, using placeholder image');
       }
 
       await setDoc(doc(db, 'users', user.uid), {
@@ -47,38 +55,33 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
         avatar: avatar,
         friends: [],
       });
-       
+
       console.log('User signed up:', email);
       onLogin();
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
-        console.error('This email is already in use. Please log in instead.');
+        alert('This email is already in use. Please log in instead.');
+      } else {
+        console.error('Error signing up:', error.message);
       }
-      console.error('Error signing up: ', error.message);
     }
   };
 
-  // Function to generate guest username
+  // Generate a guest username
   const generateGuestUsername = () => {
-    const randomNum = Math.floor(10000 + Math.random() * 90000); // Generate 5 random digits
+    const randomNum = Math.floor(10000 + Math.random() * 90000);
     return `guest${randomNum}`;
   };
 
-  // Handle guest login (no Firebase)
+  // Handle guest login
   const handleGuestLogin = () => {
     const guestUsername = generateGuestUsername();
-    alert(`You are playing as: ${guestUsername}`); // Display guest username in a pop-up
+    setGuestUsername(guestUsername);
+    setGuestAvatar(placeholder); // Set the guest avatar to the placeholder image
+    setIsGuest(true);
     if (onGuestLogin) {
-      onGuestLogin(guestUsername); // Optional: Handle guest login in the parent component
+      onGuestLogin(guestUsername);
     }
-  };
-
-  const renderGuestButton = () => {
-    return (
-      <button className="cosmic-button" onClick={handleGuestLogin}>
-        Play as Guest
-      </button>
-    );
   };
 
   const handleForgotPassword = async (event) => {
@@ -94,7 +97,17 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
 
   return (
     <section className="auth-container">
-      {isResettingPassword ? (
+      {isGuest ? (
+        <div className="guest-welcome">
+          <h2>Welcome, {guestUsername}!</h2>
+          <img
+            src={guestAvatar}
+            alt="Guest Avatar"
+            className="guest-avatar"
+          />
+          <p>You are playing as a guest.</p>
+        </div>
+      ) : isResettingPassword ? (
         <>
           <h1>Reset Your Password</h1>
           <form onSubmit={handleForgotPassword}>
@@ -136,7 +149,9 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
               {isSigningUp ? 'Sign Up' : 'Log In'}
             </button>
           </form>
-          {renderGuestButton()}
+          <button className="cosmic-button" onClick={handleGuestLogin}>
+            Play as Guest
+          </button>
           {!isSigningUp && (
             <p>
               <button className="switch-button" onClick={() => setIsResettingPassword(true)}>
