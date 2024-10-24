@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import {storage} from '../firebase';
-import {ref, getDownloadURL} from 'firebase/storage';
-import {getFirestore, doc, getDoc} from 'firebase/firestore';
+import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
+import {getFirestore, doc, updateDoc} from 'firebase/firestore';
 
-function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout}) {
+function UserProfile({user, setUser, onLogout}) {
+  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
+  const [selectedImage, setSelectedImage] = useState(placeholder);
+  const [uploading, setUploading] = useState(false);
   const [imageFetched, setImageFetched] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [newUsername, setNewUsername] = useState(user.email || '');
+  const [newUsername, setNewUsername] = useState(user.username || '');
   const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
 
   const fetchProfileImage = async () => {
-    if(!imageFetched) {
+    if(!imageFetched) { 
       const storageRef = ref(storage, `avatars/${user.uid}`);
       try {
         const url = await getDownloadURL(storageRef);
@@ -26,54 +29,84 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
 
   fetchProfileImage();
 
- 
-  const [username, setUsername] = useState(user.email || '');
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setUploading(true);
+      const storageRef = ref(storage, `avatars/${user.uid}`);
+      try {
+        await uploadBytes(storageRef, file);
+        const downloadURL = await getDownloadURL(storageRef);
+        setSelectedImage(downloadURL);
+        setUser((prevUser) => ({
+          ...prevUser, 
+          avatar: downloadURL,
+        }));
 
-  /**
-   * Summary: Obtains the username of the account logged in
-   * Purpose: Sets the username usestate to the username found in the firestore
-   */
-  const getUsername = async () => {
+        const userRef = doc(db, 'users', user.uid);
+        await updateDoc(userRef, {
+          avatar: downloadURL
+        });
+
+      } catch (error) {
+        console.error('error uploading image:', error.message);
+      } finally {
+        setUploading(false); // Uploading failed completely
+      }
+
+    }
+  }
+  
+ 
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+
     try {
       const userRef = doc(db, 'users', user.uid);
-      const userSnapshot = await getDoc(userRef);
-  
-      if(userSnapshot.exists()) {
-        const userData = userSnapshot.data();
-        const myUsername = userData.username;
-        setUsername(myUsername);
-      }
-    } catch (error){
-      console.error(error);
+      
+      await updateDoc(userRef, { // Updated the document in Firestore
+        username: newUsername,
+        email: newEmail
+      });
+
+      setUser((prevUser) => ({  // Updated local state
+        ...prevUser,
+        username: newUsername,
+        email: newEmail,
+      }));
+
+      setIsEditing(false);
+    } catch (error) {
+      console.error('error updating profile:', error);
     }
   };
 
-  getUsername();
- 
-  const handleProfileUpdate = (e) => {
-    e.preventDefault();
-    setUser((prevUser) => ({
-      ...prevUser,
-      username: newUsername, // TODO: Ayo this doesn't work because the user object that is passed from App.js into this file does not have a username attribute, you need to obtain the doc refrence from firestore, in there have the username and email information for every user
-      email: newEmail,
-    }));
-    setIsEditing(false);
-  };
-
   const handleCancelEdit = () => {
-    setNewUsername(username || '');
+    setNewUsername(user.username || '');
     setNewEmail(user.email || '');
     setIsEditing(false);
   };
-
+  // onLogout functionality is handled in App.js
+  // The function is received from App.js to UserProfile.js
 
   return (
     <div className="profile-container">
+      <h1>Welcome, {user.username || 'User'} !</h1>
       <div className="user-info">
         <img src={selectedImage} alt="User Avatar" className="avatar" />
+        <div className="user-details">
+          <span>Email: {user.email}</span>
+          <span>Username: {user.username}</span>
+        </div>
       </div>
-      <h1>Welcome, {username}</h1>
 
+      <p>You are now logged into your Cosmic Radiance profile.</p>
+     
+      <div className="upload-section">
+        <h2>Upload a New Picture</h2>
+        <input type ="file" accept="image/*" onChange={handleImageUpload} />
+        {uploading && <p>Uploading...</p>}
+      </div>
       {/* TODO : Ayo update profile functionality */}
       <div className="profile-update-section">
         {!isEditing ? (
@@ -125,6 +158,12 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
       </div>
 
 
+      <div className="friends-section">
+      <h2>Your Friends</h2>
+        <button className="view-friends-button">View Friends</button>
+        {/* Render friends list here if needed */}
+      </div>
+
       {/* TODO : Ayo logout functionality */}
       {isConfirming ? (
         <div className="logout-confirmation">
@@ -137,11 +176,10 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
           </button>
         </div>
       ) : (
-        <button className="edit-profile-button" onClick={() => setIsConfirming(true)}>
+        <button className="logout-button" onClick={() => setIsConfirming(true)}>
           Log Out
         </button>
       )}
-
     </div>
   );
 }
