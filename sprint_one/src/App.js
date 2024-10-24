@@ -3,6 +3,7 @@ import { auth } from './firebase';
 import UserAuth from './components/UserAuth';
 import UserProfile from './components/UserProfile';
 import AddFriend from './components/AddFriend';
+import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
 
@@ -11,6 +12,8 @@ function App() {
   const [isGuest, setIsGuest] = useState(false); // State to manage guest user
   const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
   const [guestAvatar, setGuestAvatar] = useState(''); // State to store guest avatar
+  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg';
+  const [selectedImage, setSelectedImage] = useState(placeholder);
 
   const handleLogin = () => {
     const currentUser = auth.currentUser;
@@ -62,19 +65,21 @@ function App() {
             </div>
           ) : (
             <div className="user-profile-container">
-              <UserProfile user={user} setUser={setUser} onLogout={handleLogout} />
+            {/* User Profile Section */}
+            <UserProfile user={user} setUser={setUser}                             selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
 
-              {/* Add Friend Section */}
-              <div className="add-friend-section">
-                <AddFriend currentUser={user} />
-              </div>
+            {/* Update Avatar Section */}
+            <UpdateAvatar user={user} setUser={setUser}                            selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
 
-              {/* Friends List Section */}
-              <div className="friends-list-section">
-                <FriendsList currentUser={user} />
-              </div>
-            </div>
+            {/* Add Friend Section */}
+            <AddFriend currentUser={user} />
+
+            {/* Friends List Section */}
+            <FriendsList currentUser={user} />
+
+          </div>
           )
+
         ) : (
           <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
         )}

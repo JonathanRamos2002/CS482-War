@@ -105,7 +105,7 @@ const FriendsList = ({ currentUser }) => {
   return (
     <div className="friends-list">
       <h2>Your Friends</h2>
-      <button onClick={fetchFriends}>view friends</button>
+      <button onClick={fetchFriends} className="edit-profile-button">View Friends</button>
       {loading && <p>Loading...</p>}
       <ul>
         {friends.map((friend) => (
@@ -115,7 +115,7 @@ const FriendsList = ({ currentUser }) => {
                alt={friend.username}
                className="friend-avatar"
              />
-            {friend.username} [{friend.email}]
+            <h3>{friend.username}</h3>
 	    <button className="remove-friend-button" onClick={() => handleRemoveFriend(friend.email)}>
             Remove Friend
             </button>

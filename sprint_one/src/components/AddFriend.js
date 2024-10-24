@@ -67,7 +67,7 @@ const AddFriend = ({ currentUser }) => {
         onChange={(e) => setSearchTerm(e.target.value)}
         className="email-input"
       />
-      <button onClick={searchUser} disabled={loading} className="search-friends">
+      <button onClick={searchUser} disabled={loading} className="add-friend-button">
         {loading ? 'Searching...' : 'Search'}
       </button>
 
