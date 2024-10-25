@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "firebase": "^10.14.1",
+    "jest": "^29.7.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-scripts": "^5.0.1",
@@ -17,6 +17,15 @@
     "build": "react-scripts build",
     "test": "jest",
     "eject": "react-scripts eject"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "src/**/*.{js,jsx}",
+      "!src/**/*.test.{js,jsx}",
+      "!**/node_modules/**"
+    ]
   },
   "eslintConfig": {
     "extends": [
@@ -50,6 +59,8 @@
     ],
     "transform": {
       "^.+\\.(js|jsx)$": "babel-jest"
-    }
+    },
+    "@testing-library/jest-dom": "^6.6.2",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
