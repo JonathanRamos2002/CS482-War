@@ -57,7 +57,14 @@ function UserProfile({user, setUser, onLogout}) {
     }
   }
   
- 
+  /**
+ * Updates user profile information in Firestore and local state
+ * @param {React.FormEvent} e 
+ * @returns {Promise<void>}
+ * @throws {FirebaseError} When database update fails
+ * @example
+ * handleProfileUpdate(event) 
+ */
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
 
@@ -80,7 +87,12 @@ function UserProfile({user, setUser, onLogout}) {
       console.error('error updating profile:', error);
     }
   };
-
+  /**
+ * Resets form fields to original values 
+ * @returns {void}
+ * @example
+ * handleCancelEdit() 
+ */
   const handleCancelEdit = () => {
     setNewUsername(user.username || '');
     setNewEmail(user.email || '');
