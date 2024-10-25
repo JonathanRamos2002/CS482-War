@@ -95,14 +95,11 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
 
   return (
     <div className="profile-container">
-      <h1>Welcome, {username} !</h1>
       <div className="user-info">
         <img src={selectedImage} alt="User Avatar" className="avatar" />
-        <div className="user-details">
-          <span>Email: {user.email}</span>
-          <span>Username: {user.username}</span>
-        </div>
       </div>
+
+      <h1>Welcome, {username} !</h1>
 
       {/* TODO : Ayo update profile functionality */}
       <div className="profile-update-section">
