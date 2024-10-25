@@ -1,8 +1,3 @@
 {
     "presets": ["@babel/preset-env", "@babel/preset-react"]
   }
-<<<<<<< HEAD
-  
-=======
-  
->>>>>>> fb88907 (AddFriend testing)

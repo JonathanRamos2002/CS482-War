@@ -3,6 +3,7 @@ import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import UserAuth from './UserAuth';
 
+
 // Mock Firebase Auth functions
 const mockCreateUserWithEmailAndPassword = jest.fn();
 const mockSignInWithEmailAndPassword = jest.fn();
