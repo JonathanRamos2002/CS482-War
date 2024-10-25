@@ -1,16 +1,13 @@
 import React, { useState } from 'react';
 import {storage} from '../firebase';
-import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
-import {getFirestore, doc, updateDoc} from 'firebase/firestore';
+import {ref, getDownloadURL} from 'firebase/storage';
+import {getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
 
-function UserProfile({user, setUser, onLogout}) {
-  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'
-  const [selectedImage, setSelectedImage] = useState(placeholder);
-  const [uploading, setUploading] = useState(false);
+function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout}) {
   const [imageFetched, setImageFetched] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [newUsername, setNewUsername] = useState(user.username || '');
+  const [newUsername, setNewUsername] = useState(user.email || '');
   const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
 
@@ -29,34 +26,29 @@ function UserProfile({user, setUser, onLogout}) {
 
   fetchProfileImage();
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setUploading(true);
-      const storageRef = ref(storage, `avatars/${user.uid}`);
-      try {
-        await uploadBytes(storageRef, file);
-        const downloadURL = await getDownloadURL(storageRef);
-        setSelectedImage(downloadURL);
-        setUser((prevUser) => ({
-          ...prevUser, 
-          avatar: downloadURL,
-        }));
+  const [username, setUsername] = useState(user.email || '');
 
-        const userRef = doc(db, 'users', user.uid);
-        await updateDoc(userRef, {
-          avatar: downloadURL
-        });
-
-      } catch (error) {
-        console.error('error uploading image:', error.message);
-      } finally {
-        setUploading(false); // Uploading failed completely
-      }
-
-    }
-  }
+  /**
+   * Summary: Obtains the username of the account logged in
+   * Purpose: Sets the username usestate to the username found in the firestore
+   */
+  const getUsername = async () => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
   
+      if(userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        const myUsername = userData.username;
+        setUsername(myUsername);
+      }
+    } catch (error){
+      console.error(error);
+    }
+  };
+
+  getUsername();
+
   /**
  * Updates user profile information in Firestore and local state
  * @param {React.FormEvent} e 
@@ -103,7 +95,7 @@ function UserProfile({user, setUser, onLogout}) {
 
   return (
     <div className="profile-container">
-      <h1>Welcome, {user.username || 'User'} !</h1>
+      <h1>Welcome, {username} !</h1>
       <div className="user-info">
         <img src={selectedImage} alt="User Avatar" className="avatar" />
         <div className="user-details">
@@ -112,13 +104,6 @@ function UserProfile({user, setUser, onLogout}) {
         </div>
       </div>
 
-      <p>You are now logged into your Cosmic Radiance profile.</p>
-     
-      <div className="upload-section">
-        <h2>Upload a New Picture</h2>
-        <input type ="file" accept="image/*" onChange={handleImageUpload} />
-        {uploading && <p>Uploading...</p>}
-      </div>
       {/* TODO : Ayo update profile functionality */}
       <div className="profile-update-section">
         {!isEditing ? (
@@ -167,13 +152,6 @@ function UserProfile({user, setUser, onLogout}) {
             </form>
           </div>
         )}
-      </div>
-
-
-      <div className="friends-section">
-      <h2>Your Friends</h2>
-        <button className="view-friends-button">View Friends</button>
-        {/* Render friends list here if needed */}
       </div>
 
       {/* TODO : Ayo logout functionality */}
