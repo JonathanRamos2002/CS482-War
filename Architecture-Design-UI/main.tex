@@ -66,7 +66,7 @@ Our back end will need to handle the game logic, player data, and real-time comm
 To store our user data, game history, and player stats we will need persistent storage. We have chosen Firebase as our persistent storage due to its ease of use with real-time updates. It will also allow us to have a more flexible schema as SQL databases require relations among the tables created. Firebase also includes built-in authentication, supporting Google and Facebook sign in, as well as traditional email and password. Overall, Firebase supports our needs of real-time updates, scalability, security, and rapid development. 
 
 \subsection{Persistent Storage}
-Our long term data will be stored in documents. The data will be organized as JSON documents which are then organized into collections. Our users will all be stored in a collection. The collection will hold documents, and each document will hold information related to one player. Each document is the equivalent of one player and therefore, each player will need to have their own document to store their information. Another collection that we will implement is the leader-board. Each document in the leader-board collection will contain information regarding the player that has achieved recognition. This structure is flexible, making it scale-able which is important for an online multiplayer game. Our NoSQL design ensures that we can continue adding more collections and documents as needed without restructuring the entire database.
+Our database is composed of three main firebase components, Authentication, Firestore, and Storage. Each of these components is responsible for storing different types of information for each user. The authentication component is responsible for storing user login information, in our application this is the email and password of every user. Importantly, the Authentication component hashes passwords with a built-in function which improves security for our users. The storage component is responsible for storing the profile images of every user. The profile picture uploaded by the user is saved to the storage component under `avatars/user.uid' in which the current user's id is used as the filename. The majority of our user's data will be saved in the Firestore component. The data will be organized as JSON documents which are then organized into collections. The user's information such as, username, friends, stats, and profile picture URL will be saved into a document appropriately titled as the `user.uid'. Each user will require their own document, and all user documents will be stored in the `users' collection. This structure is flexible, making it scale-able which is important for an online multiplayer game. Our NoSQL design ensures that we can continue adding more collections and documents as needed without restructuring the entire database.
 
 \subsection{Coding Standards}
 Our database naming scheme will consist of singular, lowercase names for collections (user, leaderboard). Each attribute within documents will use camelCase (userName, gameStats, gameID). Variables and functions in JavaScript should also be written in camelCase. 
@@ -75,23 +75,144 @@ We will format our code using two spaces for indentation. Brackets should be use
 
 Testing standards will consist of test-driven development. We will ensure proper functionality by ensuring that all code commits pass necessary code tests before merging. Code tests should handle correctness, edge cases, and performance. 
 
-
-
-
 \section{UML Diagram}
-\includegraphics[width=\textwidth]{figures/WarUML.png}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figures/WarUML.png}
+    \caption{UML diagram outlining the war card game for Cosmic Radiance}
+    \label{fig:enter-label}
+\end{figure}
 
-The UML diagram creates an outline of the War card game for Cosmo Radiance. The system features a Host class that extends the player class, granting the host control over the table, including decisions on who can join. Additionally, a Game class manages the gameplay mechanics, ensuring that the rules of the game are followed. The User Account class manages all of the information of the User, from their password to avatar, to their friends. Lastly, a table class is made to allow users to join the table or create their own table.
+The system features a Host class that extends the player class, granting the host control over the table, including decisions on who can join. Additionally, a Game class manages the gameplay mechanics, ensuring that the rules of the game are followed. The User Account class manages all of the information of the User, from their password to avatar, to their friends. Lastly, a table class is made to allow users to join the table or create their own table.
+
+\section {UI Mockups}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Welcome Page UI.png}
+    \caption{The UI design for Cosmic Radiance web app's welcome screen features a space-themed layout with royal blue tones.}
+    \label{fig:enter-label}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Lobby UI.jpeg}
+    \caption{Lobby UI.}
+    \label{fig:enter-label}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Login UI.jpeg}
+    \caption{Login Screen for Cosmic Radiance War Game.}
+    \label{fig:enter-label}
+\end{figure}
 
 
-\section{UI Mockups}
-\includegraphics[width=\textwidth]{figures/Welcome Page UI.png}
-The UI design for Cosmic Radiance web app's welcome screen features a space-themed layout with royal blue tones.
+\pagebreak
 
-\includegraphics[width=\textwidth]{figures/Lobby UI.jpeg}
+\section {Sprint 1}
+\subsection {Testing}
+\begin{figure} [h]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Testing.png}
+    \caption{Testing Output}
+    \label{fig:enter-label}
+\end{figure}
 
-\includegraphics[width=\textwidth]{figures/Login UI.jpeg}
-Login Screen for Cosmic Radiance War Game.
+    We chose Jest as a testing framework. We attempted to do unit testing for branch and statement coverage, however, we struggled with connecting jest with our react components. We managed to get some of our code tested as shown in firebase.js, AddFriend.js, and UserAuth.js. For our next sprint we plan on solving the issue with testing with a spike to ensure we meet the specified requirements. 
+
+\begin{table}[h]
+\centering
+No story changes or slices during this sprint.
+
+\caption{Sprint Story Distribution and Point Tracking}
+\begin{tabular}{|p{3cm}|p{6cm}|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Stories Attempted} & \textbf{Points Attempted} & \textbf{Status} \\
+\hline
+Ayoposi Olu & 
+\begin{itemize}
+    \item S4: Logout (1 pt)
+    \item S5: Password (2 pts)
+    \item S6: Update (1 pt)
+\end{itemize} & 
+4 & 
+Completed \\
+\hline
+Jonathan Ramos & 
+\begin{itemize}
+    \item S7: Profile Avatar (2 pts)
+    \item S8: Add Friend (2 pts)
+    \item S9: Remove Friend (2 pts)
+    \item S10: Show Friends (1 pt)
+\end{itemize}& 
+7 & 
+Completed \\
+\hline
+Brett Bonner & 
+\begin{itemize}
+    \item S1: Create User (2 pts)
+    \item S2: Guest Account (1 pt)
+    \item S3: Login (1 pt)
+\end{itemize} & 
+4 & 
+Completed \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Points Attempted}} & \multicolumn{2}{c|}{15} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Sprint Points (All Stories)}} & \multicolumn{2}{c|}{62} \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Sprint period from 10/17/2024 to 10/24/2024}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Team Velocity and Hours-per-Point Metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Hours Worked} & \textbf{Story Points} & \textbf{Hours/Point} \\
+\hline
+Ayoposi Olu & 12 & 4 & 3 \\
+\hline
+Jonathan Ramos & 20 & 7 & 2.85 \\
+\hline
+Brett Bonner & 13 & 4 & 3.25 \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Team Totals}} & \textbf{14} & \textbf{2.857} \\
+\hline
+\end{tabular}
+
+\begin{center}
+\small{Sprint Velocity History}
+\end{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Sprint} & \textbf{Points Completed} & \textbf{Hours Worked} & \textbf{Hours/Point} & \textbf{Velocity} \\
+\hline
+Sprint 1 & 14 & 45 & 3 & 14 pts/sprint \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Velocity = Points completed per sprint \\
+Hours/Point = Total hours worked / Points completed}
+\end{center}
+\end{table}
+
+
+
+
 
 \end{document}
+
 
