@@ -7,6 +7,7 @@ import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatedBackground } from 'animated-backgrounds';
 
 
 function App() {
@@ -29,7 +30,7 @@ function App() {
 
   const handleGuestLogin = (guestUsername, guestAvatar) => {
     setGuestUsername(guestUsername);
-    setGuestAvatar(guestAvatar);
+    setGuestAvatar(placeholder);
     setIsGuest(true);
     setUser({ displayName: guestUsername, isGuest: true }); // Set user as guest
   };
@@ -78,12 +79,30 @@ function App() {
     <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
   );
 
+  /* 
+   * Uncomment this code to change backgrounds on refresh, in AnimatedBackground component set animationName={animationName}
+   * 
+  import React, { useEffect } from 'react'; <-- if needed then move this to top of the file 
+  const [animationName, setAnimationName] = useState('starryNight');
+useEffect(() => {
+    const animations = ['cosmicDust', 'starryNight', 'galaxySpiral'];
+    const storedIndex = localStorage.getItem('backgroundAnimationIndex');
+    const newIndex = storedIndex ? (parseInt(storedIndex) + 1) % animations.length : 0;
+    setAnimationName(animations[newIndex]);
+    localStorage.setItem('backgroundAnimationIndex', newIndex.toString());
+  }, []);
+  */
+
   return (
+    <div>
+      <AnimatedBackground animationName='cosmicDust' />
       <Routes>
         <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
         <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
         <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
       </Routes>
+    </div>
+      
   );
 }
 

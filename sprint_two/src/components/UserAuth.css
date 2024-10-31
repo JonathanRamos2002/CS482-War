@@ -1,18 +1,17 @@
 .container {
     text-align: center;
-    width: 100%;
-    max-width: 1200px;
-    height: auto;
-    /*min-height: 50vh;*/
+    width: 50%;
     background-color: rgba(0, 0, 0, 0.7);
-    padding: 60px;
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     border: 3px solid #4f83ff;
-    margin: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .container h1 {
@@ -22,6 +21,23 @@
     text-transform: uppercase;
     letter-spacing: 5px;
     text-shadow: 2px 2px 5px #000;
+}
+
+.logo {
+    width: 300px;
+    height: auto;
+    /*border: 3px solid #4f83ff;*/
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+p {
+    padding: 20px;
 }
 
 .cosmic-button {
@@ -54,4 +70,12 @@
 
 .switch-button:hover {
     color: #b9d6ff;
+}
+
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Circular profile picture */
+    margin: 10px 0; /* Space above and below the image */
 }
