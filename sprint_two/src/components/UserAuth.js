@@ -3,6 +3,7 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
 import { ref, getStorage, getDownloadURL } from 'firebase/storage';
+import './UserAuth.css'; 
 
 const UserAuth = ({ onLogin, onGuestLogin }) => {
   const [isSigningUp, setIsSigningUp] = useState(false);
@@ -103,7 +104,10 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   };
 
   return (
-    <section className="auth-container">
+    <section className="container">
+      <h1>
+        Cosmic Radiance
+      </h1>
       {isGuest ? ( 
         <div className="guest-welcome">
           <h2>Welcome, {guestUsername}!</h2>
@@ -134,7 +138,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
         </>
       ) : (
         <>
-          <h1>{isSigningUp ? 'Register for Battle' : 'Enter the Cosmos'}</h1>
+          <h2>{isSigningUp ? 'Register for Battle' : 'Enter the Cosmos'}</h2>
           <form onSubmit={isSigningUp ? handleSignUp : handleLogin}>
             <input
               type="email"
@@ -155,10 +159,8 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
             <button type="submit" className="cosmic-button">
               {isSigningUp ? 'Sign Up' : 'Log In'}
             </button>
+            <button className="cosmic-button" onClick={handleGuestLogin}>Play as Guest</button>
           </form>
-          <button className="cosmic-button" onClick={handleGuestLogin}>
-            Play as Guest
-          </button>
           {!isSigningUp && (
             <p>
               <button className="switch-button" onClick={() => setIsResettingPassword(true)}>

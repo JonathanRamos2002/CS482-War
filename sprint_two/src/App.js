@@ -6,7 +6,7 @@ import AddFriend from './components/AddFriend';
 import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
-
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 
 function App() {
@@ -47,7 +47,7 @@ function App() {
     }
   };
 
-  const guestHTML = 
+  const GuestPage = 
   ( <div className="guest-welcome">
       <h2>Welcome, {guestUsername}!</h2>
       <img
@@ -61,7 +61,7 @@ function App() {
     </div>
   );
 
-  const userProfileHTML = 
+  const ProfilePage = 
   ( <div className="user-profile-container">
       <UserProfile user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
 
@@ -73,32 +73,17 @@ function App() {
     </div>
   );
 
-  const userAuthHTML = 
+  const AuthPage = 
   ( 
     <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
   );
 
   return (
-    <div className="container">
-      <header>
-        <h1>Cosmic Radiance</h1>
-      </header>
-
-      <main>
-        {user ? 
-          /* User Authenticated or Guest */
-          (isGuest ? guestHTML : userProfileHTML) 
-          /* User is not Authenticated and Not Guest */
-          : userAuthHTML
-        }
-      </main>
-
-      <footer>
-        <a href="#">Explore the Cosmos</a>
-        <a href="#">Rules of War</a>
-        <a href="#">Contact Galactic Support</a>
-      </footer>
-    </div>
+      <Routes>
+        <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
+        <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
+        <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
+      </Routes>
   );
 }
 
