@@ -6,14 +6,19 @@ import AddFriend from './components/AddFriend';
 import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AnimatedBackground } from 'animated-backgrounds';
+
 
 function App() {
   const [user, setUser] = useState(null);
-  const [isGuest, setIsGuest] = useState(false); // State to manage guest user
-  const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
-  const [guestAvatar, setGuestAvatar] = useState(''); // State to store guest avatar
   const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg';
   const [selectedImage, setSelectedImage] = useState(placeholder);
+
+  const [isGuest, setIsGuest] = useState(false); // State to manage guest user
+  const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
+  const [guestAvatar, setGuestAvatar] = useState(placeholder); // State to store guest avatar
+
 
   const handleLogin = () => {
     const currentUser = auth.currentUser;
@@ -25,7 +30,7 @@ function App() {
 
   const handleGuestLogin = (guestUsername, guestAvatar) => {
     setGuestUsername(guestUsername);
-    setGuestAvatar(guestAvatar);
+    setGuestAvatar(placeholder);
     setIsGuest(true);
     setUser({ displayName: guestUsername, isGuest: true }); // Set user as guest
   };
@@ -43,54 +48,61 @@ function App() {
     }
   };
 
-  return (
-    <div className="container">
-      <header>
-        <h1>Cosmic Radiance</h1>
-      </header>
-
-      <main>
-        {user ? (
-          isGuest ? (
-            <div className="guest-welcome">
-              <h2>Welcome, {guestUsername}!</h2>
-              <img
-                src={guestAvatar}
-                alt="Guest Avatar"
-                style={{ width: '100px', height: '100px', borderRadius: '50%' }}
-              />
-              <button className="cosmic-button" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="user-profile-container">
-            {/* User Profile Section */}
-            <UserProfile user={user} setUser={setUser}                             selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
-
-            {/* Update Avatar Section */}
-            <UpdateAvatar user={user} setUser={setUser}                            selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
-
-            {/* Add Friend Section */}
-            <AddFriend currentUser={user} />
-
-            {/* Friends List Section */}
-            <FriendsList currentUser={user} />
-
-          </div>
-          )
-
-        ) : (
-          <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
-        )}
-      </main>
-
-      <footer>
-        <a href="#">Explore the Cosmos</a>
-        <a href="#">Rules of War</a>
-        <a href="#">Contact Galactic Support</a>
-      </footer>
+  const GuestPage = 
+  ( <div className="guest-welcome">
+      <h2>Welcome, {guestUsername}!</h2>
+      <img
+        src={guestAvatar}
+        alt="Guest Avatar"
+        style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+      />
+      <button className="cosmic-button" onClick={handleLogout}>
+        Logout
+      </button>        
     </div>
+  );
+
+  const ProfilePage = 
+  ( <div className="user-profile-container">
+      <UserProfile user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
+
+      <UpdateAvatar user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
+
+      <AddFriend currentUser={user} />
+
+      <FriendsList currentUser={user} />
+    </div>
+  );
+
+  const AuthPage = 
+  ( 
+    <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
+  );
+
+  /* 
+   * Uncomment this code to change backgrounds on refresh, in AnimatedBackground component set animationName={animationName}
+   * 
+  import React, { useEffect } from 'react'; <-- if needed then move this to top of the file 
+  const [animationName, setAnimationName] = useState('starryNight');
+useEffect(() => {
+    const animations = ['cosmicDust', 'starryNight', 'galaxySpiral'];
+    const storedIndex = localStorage.getItem('backgroundAnimationIndex');
+    const newIndex = storedIndex ? (parseInt(storedIndex) + 1) % animations.length : 0;
+    setAnimationName(animations[newIndex]);
+    localStorage.setItem('backgroundAnimationIndex', newIndex.toString());
+  }, []);
+  */
+
+  return (
+    <div>
+      <AnimatedBackground animationName='cosmicDust' />
+      <Routes>
+        <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
+        <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
+        <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
+      </Routes>
+    </div>
+      
   );
 }
 

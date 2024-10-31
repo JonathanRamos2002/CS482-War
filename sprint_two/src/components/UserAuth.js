@@ -3,6 +3,7 @@ import { auth, db } from '../firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { setDoc, doc } from 'firebase/firestore';
 import { ref, getStorage, getDownloadURL } from 'firebase/storage';
+import './UserAuth.css'; 
 
 const UserAuth = ({ onLogin, onGuestLogin }) => {
   const [isSigningUp, setIsSigningUp] = useState(false);
@@ -11,9 +12,8 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   const [password, setPassword] = useState('');
   const [isGuest, setIsGuest] = useState(false);
   const [guestUsername, setGuestUsername] = useState('');
-  const [guestAvatar, setGuestAvatar] = useState('');
-
-  const placeholder = `${process.env.PUBLIC_URL}/images/Guest-Avatar.jpg`;
+  const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg';
+  const [guestAvatar, setGuestAvatar] = useState(placeholder);
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -77,7 +77,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
   const handleGuestLogin = () => {
     const guestUsername = generateGuestUsername();
     setGuestUsername(guestUsername);
-    setGuestAvatar(placeholder); // Set the guest avatar to the placeholder image
+    setGuestAvatar(guestAvatar); // Set the guest avatar to the placeholder image
     setIsGuest(true);
     if (onGuestLogin) {
       onGuestLogin(guestUsername);
@@ -102,21 +102,22 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
     }
   };
 
+  const logo = process.env.PUBLIC_URL + '/images/Logo.png';
+
   return (
-    <section className="auth-container">
+    <section className="container">
+      <div className='logo-container'>
+        <img src={logo} alt="Cosmic Radiance Logo" className='logo'/>
+      </div>
       {isGuest ? ( 
         <div className="guest-welcome">
           <h2>Welcome, {guestUsername}!</h2>
-          <img
-            src={guestAvatar}
-            alt="Guest Avatar"
-            className="guest-avatar"
-          />
+          <img src={placeholder} alt="Guest Avatar" className='profile-picture'/>
           <p>You are playing as a guest.</p>
         </div>
       ) : isResettingPassword ? (
         <>
-          <h1>Reset Your Password</h1>
+          <h2>Reset Your Password</h2>
           <form onSubmit={handleForgotPassword}>
             <input
               type="email"
@@ -134,7 +135,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
         </>
       ) : (
         <>
-          <h1>{isSigningUp ? 'Register for Battle' : 'Enter the Cosmos'}</h1>
+          
           <form onSubmit={isSigningUp ? handleSignUp : handleLogin}>
             <input
               type="email"
@@ -153,12 +154,10 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
               required
             />
             <button type="submit" className="cosmic-button">
-              {isSigningUp ? 'Sign Up' : 'Log In'}
+              {isSigningUp ? 'Join the Revolution' : 'Enter the Cosmos'}
             </button>
+            <button className="cosmic-button" onClick={handleGuestLogin}>Play as Guest</button>
           </form>
-          <button className="cosmic-button" onClick={handleGuestLogin}>
-            Play as Guest
-          </button>
           {!isSigningUp && (
             <p>
               <button className="switch-button" onClick={() => setIsResettingPassword(true)}>

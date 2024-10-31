@@ -16,27 +16,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center; 
-    background: url('images/space-background.jpg') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
+    
 }
 
-.container {
-    text-align: center;
-    width: 100%;
-    max-width: 1200px;
-    height: auto;
-    /*min-height: 50vh;*/
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 60px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 3px solid #4f83ff;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
+
 
 header h1 {
     font-size: 3.5em;
@@ -92,37 +75,6 @@ form input::placeholder {
     color: #b9d6ff;
 }
 
-.cosmic-button {
-    background-color: #243c8f;
-    color: white;
-    font-size: 1.2em;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-.cosmic-button:hover {
-    background-color: #1c2f6a;
-}
-
-.return-login, .switch-button {
-    background: none;
-    border: none;
-    color: #4f83ff;
-    font-size: 1em;
-    cursor: pointer;
-}
-
-.return-login {
-    padding: 20px;
-}
-
-.switch-button:hover {
-    color: #b9d6ff;
-}
 
 .auth-container h1 {
     margin-bottom: 10px;
