@@ -1,29 +1,22 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { getFirestore, doc, setDoc, arrayUnion, onSnapshot } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, arrayUnion, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
 import '../Chat.css';
 
 const Chat = ({ currentUser, friend, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const db = getFirestore();
-  const messageContainerRef = useRef(null); // Ref for the message container
-
-  console.log('Current User UID:', currentUser.uid);
-  console.log('Friend UID:', friend.uid);
+  const messageContainerRef = useRef(null);
 
   useEffect(() => {
     const chatId = [currentUser.uid, friend.uid].sort().join('_');
-    console.log('Generated chatId:', chatId);
-
     const chatDocRef = doc(db, 'chats', chatId);
 
     const unsubscribe = onSnapshot(chatDocRef, (doc) => {
       if (doc.exists()) {
         const data = doc.data();
         setMessages(data.messages || []);
-        console.log('Fetched messages:', data.messages);
       } else {
-        console.log('No chat document exists, initializing...');
         setMessages([]);
       }
     });
@@ -32,7 +25,6 @@ const Chat = ({ currentUser, friend, onClose }) => {
   }, [currentUser.uid, friend.uid, db]);
 
   useEffect(() => {
-    // Scroll to the bottom whenever messages are updated
     if (messageContainerRef.current) {
       messageContainerRef.current.scrollTop = messageContainerRef.current.scrollHeight;
     }
@@ -52,17 +44,15 @@ const Chat = ({ currentUser, friend, onClose }) => {
     };
 
     try {
-      // Manually update local messages state for instant UI response
-      setMessages((prevMessages) => [...prevMessages, messageData]);
+      const chatDoc = await getDoc(chatDocRef);
+      if (!chatDoc.exists()) {
+        await setDoc(chatDocRef, { messages: [] });
+      }
 
-      // Add message to Firestore
-      await setDoc(
-        chatDocRef,
-        { messages: arrayUnion(messageData) },
-        { merge: true }
-      );
+      await updateDoc(chatDocRef, {
+        messages: arrayUnion(messageData),
+      });
 
-      console.log('Message sent:', newMessage);
       setNewMessage('');
     } catch (error) {
       console.error('Error sending message:', error);
