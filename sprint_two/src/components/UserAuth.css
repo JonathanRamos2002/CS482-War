@@ -1,0 +1,57 @@
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 1200px;
+    height: auto;
+    /*min-height: 50vh;*/
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 60px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 3px solid #4f83ff;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.container h1 {
+    text-align: center;
+    font-size: 3.5em;
+    color: #4f83ff;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 5px #000;
+}
+
+.cosmic-button {
+    background-color: #243c8f;
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.cosmic-button:hover {
+    background-color: #1c2f6a;
+}
+
+.return-login, .switch-button {
+    background: none;
+    border: none;
+    color: #4f83ff;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.return-login {
+    padding: 20px;
+}
+
+.switch-button:hover {
+    color: #b9d6ff;
+}
