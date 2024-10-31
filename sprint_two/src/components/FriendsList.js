@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
-
+import Chat from './Chat';
 
 const FriendsList = ({ currentUser }) => {
   const [friends, setFriends] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
   const db = getFirestore();
 
 
@@ -39,6 +40,14 @@ const FriendsList = ({ currentUser }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openChat = (friend) => {
+    setSelectedFriend(friend);
+  };
+
+  const closeChat = () => {
+    setSelectedFriend(null);
   };
 
   
@@ -100,8 +109,6 @@ const FriendsList = ({ currentUser }) => {
     }
   };
 
-
-
   return (
     <div className="friends-list">
       <h2>Your Friends</h2>
@@ -110,22 +117,33 @@ const FriendsList = ({ currentUser }) => {
       <ul>
         {friends.map((friend) => (
           <li key={friend.email} className="friend-item">
-            <img 
-               src={friend.avatar || process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'} 
-               alt={friend.username}
-               className="friend-avatar"
-             />
+            <img
+              src={friend.avatar || process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'}
+              alt={friend.username}
+              className="friend-avatar"
+            />
             <h3>{friend.username}</h3>
-	    <button className="remove-friend-button" onClick={() => handleRemoveFriend(friend.email)}>
-            Remove Friend
-            </button>
-
+            <div className="friend-actions">
+            <button className="message-friend-button" onClick={() => openChat(friend)}>
+                Message Friend
+              </button>
+              <button className="remove-friend-button" onClick={() => handleRemoveFriend(friend.email)}>
+                Remove Friend
+              </button>
+            </div>
           </li>
         ))}
       </ul>
+
+      {selectedFriend && (
+        <Chat
+          currentUser={currentUser}
+          friend={selectedFriend}
+          onClose={closeChat}
+        />
+      )}
     </div>
   );
 };
 
 export default FriendsList;
-

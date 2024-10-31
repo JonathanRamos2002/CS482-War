@@ -1,0 +1,72 @@
+/* FriendsList.css */
+
+.friends-list {
+    margin-top: 30px;
+    color: #b9d6ff;
+    text-align: center;
+}
+
+.friends-list h2 {
+    margin-bottom: 15px;
+}
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #4f83ff;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%; /* Ensures full width */
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #4f83ff;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+
+.friend-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto; /* Aligns the actions container to the right */
+}
+
+.message-friend-button,
+.remove-friend-button {
+    background-color: #4f83ff;
+    color: white;
+    font-size: 1em;
+    padding: 5px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.message-friend-button:hover {
+    background-color: #3a6fbf;
+}
+
+.remove-friend-button {
+    background-color: #ff4d4d;
+}
+
+.remove-friend-button:hover {
+    background-color: #d43f3f;
+}
