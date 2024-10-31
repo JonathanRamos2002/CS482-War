@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import Chat from './Chat';
 
@@ -7,30 +7,34 @@ const FriendsList = ({ currentUser }) => {
   const [loading, setLoading] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState(null);
   const db = getFirestore();
-
+  
   const fetchFriends = async () => {
     setLoading(true);
-
+  
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnapshot = await getDoc(userRef);
-
+  
       if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
         const friendIDs = userData.friends || []; 
         const friendsData = [];
-
+  
         for (const friendID of friendIDs) {
           const friendRef = doc(db, 'users', friendID);
           const friendSnapshot = await getDoc(friendRef);
           if (friendSnapshot.exists()) {
-            friendsData.push(friendSnapshot.data());
+            const friendData = friendSnapshot.data();
+            friendsData.push({
+              uid: friendID, // Explicitly set the uid to the document ID
+              ...friendData,
+            });
           }
         }
-
+  
         setFriends(friendsData);
       } else {
-        console.log('user not found');
+        console.log('User not found');
       }
     } catch (error) {
       console.error(error);
@@ -38,9 +42,18 @@ const FriendsList = ({ currentUser }) => {
       setLoading(false);
     }
   };
+  
 
   const openChat = (friend) => {
-    setSelectedFriend(friend);
+    console.log("Opening chat with friend:", friend);  // Debug log
+    if (friend && friend.uid) {
+      setSelectedFriend({
+        uid: friend.uid,
+        username: friend.username,
+      });
+    } else {
+      console.warn("Friend UID is missing or undefined.");
+    }
   };
 
   const closeChat = () => {
@@ -86,6 +99,11 @@ const FriendsList = ({ currentUser }) => {
     }
   };
 
+  // Automatically fetch friends when component mounts
+  useEffect(() => {
+    fetchFriends();
+  }, []);
+
   return (
     <div className="friends-list">
       <h2>Your Friends</h2>
@@ -93,7 +111,7 @@ const FriendsList = ({ currentUser }) => {
       {loading && <p>Loading...</p>}
       <ul>
         {friends.map((friend) => (
-          <li key={friend.email} className="friend-item">
+          <li key={friend.uid} className="friend-item">
             <img
               src={friend.avatar || process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg'}
               alt={friend.username}
@@ -101,7 +119,7 @@ const FriendsList = ({ currentUser }) => {
             />
             <h3 className="friend-info">{friend.username}</h3>
             <div className="friend-actions">
-            <button className="message-friend-button" onClick={() => openChat(friend)}>
+              <button className="message-friend-button" onClick={() => openChat(friend)}>
                 Message Friend
               </button>
               <button className="remove-friend-button" onClick={() => handleRemoveFriend(friend.email)}>
