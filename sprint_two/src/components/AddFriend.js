@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getFirestore, collection, query, where, getDocs, getDoc, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import './AddFriend.css'; 
 
 const AddFriend = ({ currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');

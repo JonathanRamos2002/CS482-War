@@ -63,13 +63,12 @@ function App() {
   );
 
   const ProfilePage = 
-  ( <div className="user-profile-container">
-      <UserProfile user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
-
-      <UpdateAvatar user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
-
-      <AddFriend currentUser={user} />
-
+  ( <div className="background-container">
+      <UserProfile user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage} onLogout={handleLogout} />
+      <div className="middle-container">
+        <UpdateAvatar user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
+        <AddFriend currentUser={user} />
+      </div>
       <FriendsList currentUser={user} />
     </div>
   );

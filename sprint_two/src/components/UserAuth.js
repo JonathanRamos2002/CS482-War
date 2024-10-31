@@ -173,6 +173,11 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
           </p>
         </>
       )}
+      <footer>
+        <a href="#">Explore Cosmos</a>
+        <a href="#">Rules of War</a>
+        <a href="#">Galactic Support</a>
+      </footer>
     </section>
   );
 };

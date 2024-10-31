@@ -37,7 +37,8 @@
 }
 
 p {
-    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 20px;
 }
 
 .cosmic-button {
@@ -78,4 +79,20 @@ p {
     height: 50px;
     border-radius: 50%; /* Circular profile picture */
     margin: 10px 0; /* Space above and below the image */
+}
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    font-family: 'Orbitron', sans-serif;
+}
+
+footer a {
+    color: #4f83ff;
+    text-decoration: none;
+    font-size: 1.2em;
+}
+
+footer a:hover {
+    color: #b9d6ff;
 }

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {storage} from '../firebase';
 import {ref, uploadBytes, getDownloadURL} from 'firebase/storage';
 import {getFirestore, doc, updateDoc} from 'firebase/firestore';
+import './UpdateAvatar.css'; 
 
 
 function UpdateAvatar({user, setUser, selectedImage, setSelectedImage}) {
@@ -38,8 +39,8 @@ function UpdateAvatar({user, setUser, selectedImage, setSelectedImage}) {
 
   return(
     <div className="upload-picture-container">
-      <h2>Upload a New Picture</h2>
-        <input type="file" accept="image/*" onChange={handleImageUpload} className="edit-profile-button" />
+      <h2>Upload a New Picture</h2> 
+        <input type="file" accept="image/*" onChange={handleImageUpload} className="upload-button" />
           {uploading && <p>Uploading...</p>}
     </div>
   );

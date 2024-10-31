@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
+import './FriendsList.css'; 
 
 
 const FriendsList = ({ currentUser }) => {
