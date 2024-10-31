@@ -7,13 +7,17 @@ import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
 
+
+
 function App() {
   const [user, setUser] = useState(null);
-  const [isGuest, setIsGuest] = useState(false); // State to manage guest user
-  const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
-  const [guestAvatar, setGuestAvatar] = useState(''); // State to store guest avatar
   const placeholder = process.env.PUBLIC_URL + '/images/Guest-Avatar.jpg';
   const [selectedImage, setSelectedImage] = useState(placeholder);
+
+  const [isGuest, setIsGuest] = useState(false); // State to manage guest user
+  const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
+  const [guestAvatar, setGuestAvatar] = useState(placeholder); // State to store guest avatar
+
 
   const handleLogin = () => {
     const currentUser = auth.currentUser;
@@ -43,6 +47,37 @@ function App() {
     }
   };
 
+  const guestHTML = 
+  ( <div className="guest-welcome">
+      <h2>Welcome, {guestUsername}!</h2>
+      <img
+        src={guestAvatar}
+        alt="Guest Avatar"
+        style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+      />
+      <button className="cosmic-button" onClick={handleLogout}>
+        Logout
+      </button>        
+    </div>
+  );
+
+  const userProfileHTML = 
+  ( <div className="user-profile-container">
+      <UserProfile user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
+
+      <UpdateAvatar user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
+
+      <AddFriend currentUser={user} />
+
+      <FriendsList currentUser={user} />
+    </div>
+  );
+
+  const userAuthHTML = 
+  ( 
+    <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
+  );
+
   return (
     <div className="container">
       <header>
@@ -50,39 +85,12 @@ function App() {
       </header>
 
       <main>
-        {user ? (
-          isGuest ? (
-            <div className="guest-welcome">
-              <h2>Welcome, {guestUsername}!</h2>
-              <img
-                src={guestAvatar}
-                alt="Guest Avatar"
-                style={{ width: '100px', height: '100px', borderRadius: '50%' }}
-              />
-              <button className="cosmic-button" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="user-profile-container">
-            {/* User Profile Section */}
-            <UserProfile user={user} setUser={setUser}                             selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
-
-            {/* Update Avatar Section */}
-            <UpdateAvatar user={user} setUser={setUser}                            selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
-
-            {/* Add Friend Section */}
-            <AddFriend currentUser={user} />
-
-            {/* Friends List Section */}
-            <FriendsList currentUser={user} />
-
-          </div>
-          )
-
-        ) : (
-          <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
-        )}
+        {user ? 
+          /* User Authenticated or Guest */
+          (isGuest ? guestHTML : userProfileHTML) 
+          /* User is not Authenticated and Not Guest */
+          : userAuthHTML
+        }
       </main>
 
       <footer>
