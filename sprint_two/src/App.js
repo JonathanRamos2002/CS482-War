@@ -48,42 +48,56 @@ function App() {
       <header>
         <h1>Cosmic Radiance</h1>
       </header>
-
       <main>
-        {user ? (
-          isGuest ? (
-            <div className="guest-welcome">
-              <h2>Welcome, {guestUsername}!</h2>
-              <img
-                src={guestAvatar}
-                alt="Guest Avatar"
-                style={{ width: '100px', height: '100px', borderRadius: '50%' }}
-              />
-              <button className="cosmic-button" onClick={handleLogout}>
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="user-profile-container">
-            {/* User Profile Section */}
-            <UserProfile user={user} setUser={setUser}                             selectedImage={selectedImage} setSelectedImage={setSelectedImage}                  onLogout={handleLogout} />
+  {user ? (
+    isGuest ? (
+      <div className="guest-welcome">
+        <h2>Welcome, {guestUsername}!</h2>
+        <img
+          src={guestAvatar}
+          alt="Guest Avatar"
+          style={{ width: '100px', height: '100px', borderRadius: '50%' }}
+        />
+        <button className="cosmic-button" onClick={handleLogout}>
+          Logout
+        </button>
+      </div>
+    ) : (
+      <div className="user-profile-container">
+        {/* User Profile Section */}
+        <UserProfile 
+          user={user} 
+          setUser={setUser}                             
+          selectedImage={selectedImage} 
+          setSelectedImage={setSelectedImage}                  
+          onLogout={handleLogout} 
+        />
 
-            {/* Update Avatar Section */}
-            <UpdateAvatar user={user} setUser={setUser}                            selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
+        {/* Update Avatar Section */}
+        <UpdateAvatar 
+          user={user} 
+          setUser={setUser}                            
+          selectedImage={selectedImage} 
+          setSelectedImage={setSelectedImage} 
+        />
 
-            {/* Add Friend Section */}
-            <AddFriend currentUser={user} />
+        {/* Add Friend Section */}
+        <AddFriend currentUser={user} />
 
-            {/* Friends List Section */}
-            <FriendsList currentUser={user} />
+        {/* Friends List Section */}
+        <FriendsList 
+          currentUser={{
+            uid: user?.uid || 'guest', // Provide 'guest' as fallback if no uid
+            displayName: user?.displayName || guestUsername || 'Guest' // Use guestUsername if available
+          }} 
+        />
 
-          </div>
-          )
-
-        ) : (
-          <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
-        )}
-      </main>
+      </div>
+    )
+  ) : (
+    <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
+  )}
+</main>
 
       <footer>
         <a href="#">Explore the Cosmos</a>

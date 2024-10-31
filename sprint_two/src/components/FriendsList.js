@@ -8,34 +8,31 @@ const FriendsList = ({ currentUser }) => {
   const [selectedFriend, setSelectedFriend] = useState(null);
   const db = getFirestore();
 
-
   const fetchFriends = async () => {
     setLoading(true);
-  
+
     try {
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnapshot = await getDoc(userRef);
 
-      if(userSnapshot.exists()) {
+      if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
-        const friendIDs = userData.friends || []; // if no friends then empty array
+        const friendIDs = userData.friends || []; 
         const friendsData = [];
-        
+
         for (const friendID of friendIDs) {
           const friendRef = doc(db, 'users', friendID);
           const friendSnapshot = await getDoc(friendRef);
-          if(friendSnapshot.exists()) {
+          if (friendSnapshot.exists()) {
             friendsData.push(friendSnapshot.data());
           }
-        
         }
-    
+
         setFriends(friendsData);
       } else {
         console.log('user not found');
       }
-
-    } catch(error) {
+    } catch (error) {
       console.error(error);
     } finally {
       setLoading(false);
@@ -50,62 +47,42 @@ const FriendsList = ({ currentUser }) => {
     setSelectedFriend(null);
   };
 
-  
   const getDocumentNameByEmail = async (email) => {
-    const db = getFirestore();
     const usersRef = collection(db, 'users');
     const q = query(usersRef, where('email', '==', email));
 
-   try {
-     const querySnapshot = await getDocs(q);
-     if(!querySnapshot.empty) {
-       const userDoc = querySnapshot.docs[0];
-       //console.log(`Document Name for Email ${email} is ${userDoc.id}`);
-       return userDoc.id;
-     } else {
-       console.log('no user found with this email');
-       return null;
-     }
-   } catch (error) {
-     console.error(error);
-     return null;
-   }
+    try {
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        return querySnapshot.docs[0].id;
+      } else {
+        console.log('No user found with this email');
+        return null;
+      }
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
   };
 
-  
   const handleRemoveFriend = async (friendEmailToRemove) => {
     try {
       const friendIDToRemove = await getDocumentNameByEmail(friendEmailToRemove);
-      if (!friendIDToRemove) {
-        console.log('friend ID not found');
-        return;
-      }
+      if (!friendIDToRemove) return;
 
-      //console.log(friendIDToRemove);
       const userRef = doc(db, 'users', currentUser.uid);
       const userSnapshot = await getDoc(userRef);
- 
-      if(userSnapshot.exists()) {
+
+      if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
-
-        if(Array.isArray(userData.friends)){
+        if (Array.isArray(userData.friends)) {
           const updatedFriends = userData.friends.filter((friendID) => friendID !== friendIDToRemove);
-          console.log('updated friends list:', updatedFriends);
-
-          await updateDoc(userRef, {
-            friends: updatedFriends
-          });
-          
-          console.log('friend removed successfully');
+          await updateDoc(userRef, { friends: updatedFriends });
           fetchFriends();
-        } else {
-          console.log('No friends list found in user document');
         }
-      } else {
-        console.log('User not found');
-      }    
+      }
     } catch (error) {
-      console.error('error removing friend:', error);
+      console.error('Error removing friend:', error);
     }
   };
 
@@ -122,7 +99,7 @@ const FriendsList = ({ currentUser }) => {
               alt={friend.username}
               className="friend-avatar"
             />
-            <h3>{friend.username}</h3>
+            <h3 className="friend-info">{friend.username}</h3>
             <div className="friend-actions">
             <button className="message-friend-button" onClick={() => openChat(friend)}>
                 Message Friend

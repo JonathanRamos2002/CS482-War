@@ -8,13 +8,14 @@ const Chat = ({ currentUser, friend, onClose }) => {
   const [newMessage, setNewMessage] = useState('');
   const db = getFirestore();
 
+  console.log('currentUser:', currentUser);
+  console.log('friend:', friend);
+
   useEffect(() => {
-    // Reference to the chat collection between the two users
     const chatId = [currentUser.uid, friend.uid].sort().join('_');
     const messagesRef = collection(db, 'chats', chatId, 'messages');
     const q = query(messagesRef, orderBy('timestamp', 'asc'));
 
-    // Real-time listener for chat messages
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const fetchedMessages = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -48,7 +49,7 @@ const Chat = ({ currentUser, friend, onClose }) => {
   return (
     <div className="chat-container">
       <header className="chat-header">
-        <h2>Chat with {friend.username}</h2>
+        <h2>Chat with {friend.username || 'Unknown User'}</h2>
         <button onClick={onClose} className="close-chat-button">Close Chat</button>
       </header>
 

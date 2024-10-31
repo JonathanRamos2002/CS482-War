@@ -1,50 +1,34 @@
-/* FriendsList.css */
-
-.friends-list {
-    margin-top: 30px;
-    color: #b9d6ff;
-    text-align: center;
-}
-
-.friends-list h2 {
-    margin-bottom: 15px;
-}
-
 .friend-item {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: space-between; /* Ensures space between avatar/info and buttons */
     margin: 10px 0;
     padding: 10px;
     border: 1px solid #4f83ff;
     border-radius: 8px;
     background-color: rgba(0, 0, 0, 0.6);
+    width: 100%; /* Ensure it spans full container width */
 }
 
 .friend-avatar {
-    width: 40px;
+    width: 40px; /* Adjust to control the avatar size */
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
+    object-fit: cover; /* Ensures the image maintains its aspect ratio within the container */
 }
 
-.friend-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%; /* Ensures full width */
-    margin: 10px 0;
-    padding: 10px;
-    border: 1px solid #4f83ff;
-    border-radius: 8px;
-    background-color: rgba(0, 0, 0, 0.6);
-}
 
+.friend-info {
+    flex-grow: 1;
+    text-align: left;
+}
 
 .friend-actions {
     display: flex;
     gap: 10px;
-    margin-left: auto; /* Aligns the actions container to the right */
+    margin-left: auto;
+    align-items: center; /* Ensures buttons are centered vertically */
 }
 
 .message-friend-button,
@@ -52,7 +36,7 @@
     background-color: #4f83ff;
     color: white;
     font-size: 1em;
-    padding: 5px 15px;
+    padding: 8px 15px;
     border: none;
     border-radius: 8px;
     cursor: pointer;
