@@ -1,0 +1,69 @@
+/* Add Friend Styling */
+.add-friend-container {
+    padding: 20px;
+    color: #b9d6ff; /* Light text color */
+    text-align: center; /* Center-align text */
+    vertical-align: middle;
+}
+
+.email-input {
+    font-size: 1em;
+    padding: 10px;
+    margin-bottom: 20px;
+    width: 100%; /* Full width */
+    border-radius: 8px;
+    border: 2px solid #4f83ff; /* Blue border */
+    background-color: rgba(0, 0, 0, 0.6); /* Darker input background */
+    color: #ffffff; /* White text */
+}
+
+.search-button {
+    background-color: #243c8f;
+    color: white;
+    font-size: 1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.search-button:hover {
+    background-color: #1c2f6a; /* Darker on hover */
+}
+
+.error-message {
+    color: red; /* Error text color */
+    margin-top: 10px; /* Space above error message */
+}
+
+.found-user {
+    margin-top: 20px; /* Space above found user section */
+    background-color: rgba(255, 255, 255, 0.1); /* Light background for visibility */
+    padding: 10px;
+    border-radius: 8px; /* Rounded corners */
+}
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Circular profile picture */
+    margin: 10px 0; /* Space above and below the image */
+}
+
+.add-friend-button {
+    background-color: #4f83ff;
+    color: white;
+    font-size: 1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.add-friend-button:hover {
+    background-color: #3a6fbf; /* Darker blue on hover */
+}

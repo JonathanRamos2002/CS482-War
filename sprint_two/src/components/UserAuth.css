@@ -1,0 +1,98 @@
+.container {
+    text-align: center;
+    width: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 3px solid #4f83ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.container h1 {
+    text-align: center;
+    font-size: 3.5em;
+    color: #4f83ff;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    text-shadow: 2px 2px 5px #000;
+}
+
+.logo {
+    width: 300px;
+    height: auto;
+    /*border: 3px solid #4f83ff;*/
+}
+
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+p {
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.cosmic-button {
+    background-color: #243c8f;
+    color: white;
+    font-size: 1.2em;
+    padding: 15px 30px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 10px;
+}
+
+.cosmic-button:hover {
+    background-color: #1c2f6a;
+}
+
+.return-login, .switch-button {
+    background: none;
+    border: none;
+    color: #4f83ff;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+.return-login {
+    padding: 20px;
+}
+
+.switch-button:hover {
+    color: #b9d6ff;
+}
+
+
+.profile-picture {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%; /* Circular profile picture */
+    margin: 10px 0; /* Space above and below the image */
+}
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    font-family: 'Orbitron', sans-serif;
+}
+
+footer a {
+    color: #4f83ff;
+    text-decoration: none;
+    font-size: 1.2em;
+}
+
+footer a:hover {
+    color: #b9d6ff;
+}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import {storage} from '../firebase';
 import {ref, getDownloadURL} from 'firebase/storage';
 import {getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
+import './UserProfile.css'; 
 
 function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout}) {
   const [imageFetched, setImageFetched] = useState(false);

@@ -11,31 +11,10 @@ html, body {
     font-family: 'Orbitron', sans-serif;
 }
 
-
 body {
     display: flex;
     justify-content: center;
     align-items: center; 
-    background: url('images/space-background.jpg') no-repeat center center fixed;
-    background-size: cover;
-    min-height: 100vh;
-}
-
-.container {
-    text-align: center;
-    width: 100%;
-    max-width: 1200px;
-    height: auto;
-    /*min-height: 50vh;*/
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 60px;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    border: 3px solid #4f83ff;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
 }
 
 header h1 {
@@ -45,12 +24,6 @@ header h1 {
     text-transform: uppercase;
     letter-spacing: 5px;
     text-shadow: 2px 2px 5px #000;
-}
-
-.tagline {
-    font-size: 1.2em;
-    margin-bottom: 30px;
-    color: #b9d6ff;
 }
 
 /* Style for login, signup, and guest sections */
@@ -69,6 +42,27 @@ h2 {
     color: #b9d6ff;
     margin-bottom: 15px;
 }
+
+.background-container {
+    text-align: center;
+    width: 50%;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    border: 3px solid #4f83ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.middle-container {
+    display: flex; /* Use flexbox for middle components */
+    flex: 0 0 auto; /* Prevent middle components from growing */
+  }
 
 form {
     display: flex;
@@ -89,207 +83,5 @@ form input {
 }
 
 form input::placeholder {
-    color: #b9d6ff;
-}
-
-.cosmic-button {
-    background-color: #243c8f;
-    color: white;
-    font-size: 1.2em;
-    padding: 15px 30px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-.cosmic-button:hover {
-    background-color: #1c2f6a;
-}
-
-.return-login, .switch-button {
-    background: none;
-    border: none;
-    color: #4f83ff;
-    font-size: 1em;
-    cursor: pointer;
-}
-
-.return-login {
-    padding: 20px;
-}
-
-.switch-button:hover {
-    color: #b9d6ff;
-}
-
-.auth-container h1 {
-    margin-bottom: 10px;
-}
-
-.auth-container p {
-    margin-top: 50px;
-}
-
-/* Profile Container Styling */
-.profile-container {
-    text-align: center;
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    /*background-color: rgba(0,0,0,0.7);*/
-    border-radius: 10px;
-    /*box-shadow: 0 5px 15px rgba(0,0,0,0.5);*/
-    color: #b9d6ff;
-}
-
-.user-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 15px;
-    object-fit: cover;
-}
-
-.input-and-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.edit-profile-button {
-    background-color: #4f83ff;
-    color: white;
-    font-size: 1em;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    display: inline-block;
-}
-
-.edit-profile-button:hover {
-    background-color: #3a6fbf;
-}
-
-input[type="file"] {
-    padding: 10px;
-    border-radius: 5px;
-    border: 2px solid #4f83ff; /* Match the primary color */
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-}
-/* Add Friend Styling */
-.add-friend-container {
-    background-color: rgba(0, 0, 0, 0.7); /* Slightly transparent black */
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    min-height: 150px;
-    max-width: 400px; /* Limit the width */
-    color: #b9d6ff; /* Light text color */
-    text-align: center; /* Center-align text */
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.upload-picture-container {
-    background-color: rgba(0, 0, 0, 0.7); /* Slightly transparent black */
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    min-height: 150px;
-    max-width: 400px; /* Limit the width */
-    color: #b9d6ff; /* Light text color */
-    text-align: center; /* Center-align text */
-    display: inline-block;
-    vertical-align: middle;
-}
-
-.email-input {
-    font-size: 1em;
-    padding: 10px;
-    margin-bottom: 20px;
-    width: 100%; /* Full width */
-    border-radius: 8px;
-    border: 2px solid #4f83ff; /* Blue border */
-    background-color: rgba(0, 0, 0, 0.6); /* Darker input background */
-    color: #ffffff; /* White text */
-}
-
-.search-button {
-    background-color: #243c8f;
-    color: white;
-    font-size: 1em;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-.search-button:hover {
-    background-color: #1c2f6a; /* Darker on hover */
-}
-
-.error-message {
-    color: red; /* Error text color */
-    margin-top: 10px; /* Space above error message */
-}
-
-.found-user {
-    margin-top: 20px; /* Space above found user section */
-    background-color: rgba(255, 255, 255, 0.1); /* Light background for visibility */
-    padding: 10px;
-    border-radius: 8px; /* Rounded corners */
-}
-
-.profile-picture {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%; /* Circular profile picture */
-    margin: 10px 0; /* Space above and below the image */
-}
-
-.add-friend-button {
-    background-color: #4f83ff;
-    color: white;
-    font-size: 1em;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-    margin-top: 10px;
-}
-
-.add-friend-button:hover {
-    background-color: #3a6fbf; /* Darker blue on hover */
-}
-
-footer {
-    margin-top: 30px;
-    font-family: 'Orbitron', sans-serif;
-}
-
-footer a {
-    color: #4f83ff;
-    margin: 0 15px;
-    text-decoration: none;
-    font-size: 1.2em;
-}
-
-footer a:hover {
     color: #b9d6ff;
 }

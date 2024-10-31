@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import Chat from './Chat';
+import './FriendsList.css'; 
 
 const FriendsList = ({ currentUser }) => {
   const [friends, setFriends] = useState([]);
