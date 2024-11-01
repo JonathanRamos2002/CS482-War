@@ -102,7 +102,7 @@ const UserAuth = ({ onLogin, onGuestLogin }) => {
     }
   };
 
-  const logo = process.env.PUBLIC_URL + '/images/Logo.png';
+  const logo = process.env.PUBLIC_URL + '/images/Logo3_Background_Removed.png';
 
   return (
     <section className="container">
