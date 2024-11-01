@@ -1,0 +1,56 @@
+.friend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Ensures space between avatar/info and buttons */
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid #4f83ff;
+    border-radius: 8px;
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 100%; /* Ensure it spans full container width */
+}
+
+.friend-avatar {
+    width: 40px; /* Adjust to control the avatar size */
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover; /* Ensures the image maintains its aspect ratio within the container */
+}
+
+
+.friend-info {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+    align-items: center; /* Ensures buttons are centered vertically */
+}
+
+.message-friend-button,
+.remove-friend-button {
+    background-color: #4f83ff;
+    color: white;
+    font-size: 1em;
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.message-friend-button:hover {
+    background-color: #3a6fbf;
+}
+
+.remove-friend-button {
+    background-color: #ff4d4d;
+}
+
+.remove-friend-button:hover {
+    background-color: #d43f3f;
+}
