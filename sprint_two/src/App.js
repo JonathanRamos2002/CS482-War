@@ -107,12 +107,7 @@ useEffect(() => {
         <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
         <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
         <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
-        <Route path="/lobby" element={user ? ( <Lobby user={user} onLogout={handleLogout} isGuest={isGuest} />
-            ) : (
-              <Navigate to="/" />
-            )
-          } 
-        />
+        <Route path="/lobby" element={user ? <Lobby user={user} onLogout={handleLogout} isGuest={isGuest} /> : <Navigate to="/" />}/>
       </Routes>
     </div>
 
