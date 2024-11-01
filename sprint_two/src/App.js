@@ -8,6 +8,7 @@ import FriendsList from './components/FriendsList';
 import './styles.css';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from 'animated-backgrounds';
+import Lobby from './components/Lobby';
 
 
 function App() {
@@ -106,9 +107,15 @@ useEffect(() => {
         <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
         <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
         <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
+        <Route path="/lobby" element={user ? ( <Lobby user={user} onLogout={handleLogout} isGuest={isGuest} />
+            ) : (
+              <Navigate to="/" />
+            )
+          } 
+        />
       </Routes>
     </div>
-      
+
   );
 }
 
