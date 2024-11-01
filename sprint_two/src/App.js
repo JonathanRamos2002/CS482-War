@@ -6,7 +6,7 @@ import AddFriend from './components/AddFriend';
 import UpdateAvatar from './components/UpdateAvatar';
 import FriendsList from './components/FriendsList';
 import './styles.css';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from 'animated-backgrounds';
 
 
@@ -18,6 +18,7 @@ function App() {
   const [isGuest, setIsGuest] = useState(false); // State to manage guest user
   const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
   const [guestAvatar, setGuestAvatar] = useState(placeholder); // State to store guest avatar
+  const navigate = useNavigate(); //hook for navigation
 
 
   const handleLogin = () => {
@@ -58,7 +59,10 @@ function App() {
       />
       <button className="cosmic-button" onClick={handleLogout}>
         Logout
-      </button>        
+      </button> 
+      <button className="cosmic-button" onClick={() => navigate('/lobby')}>
+        Continue to Lobby
+      </button>       
     </div>
   );
 
@@ -70,6 +74,9 @@ function App() {
         <AddFriend currentUser={user} />
       </div>
       <FriendsList currentUser={user} />
+      <button className="cosmic-button" onClick={() => navigate('/lobby')}>
+        Continue to Lobby
+      </button>
     </div>
   );
 
