@@ -60,7 +60,8 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
           };
     
           await addDoc(tablesRef, newTable);
-          navigate('/table');  
+        
+          
         } catch (error) {
           console.error('Error creating table:', error);
           alert('Failed to create table. Please try again.');
