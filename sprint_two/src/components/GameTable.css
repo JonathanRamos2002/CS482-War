@@ -1,0 +1,135 @@
+.game-container {
+    text-align: center;
+    width: 60%;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 20px;
+    border: 3px solid #4f83ff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.game-board {
+    /* border: 2px solid #333; remove to help visualize container */
+    min-height: 400px;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex; /* Use flex display */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: space-between; /* Space out items */
+    align-items: center; /* Center items horizontally */
+    position: relative;
+}
+
+.drawn-cards-container {
+    display: flex; /* Use flexbox for middle components */
+    justify-content: space-between; /* Adds space between bot-card and player-card */
+    align-items: center; /* Centers the cards vertically */
+    width: 20%; /* Adjust the width to control spacing */
+    margin: 0 auto; /* Centers the container within the parent */
+}
+
+.card-backside {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px; 
+    height: auto;
+}
+
+.card-wrapper {
+    display: flex;
+    flex-direction: column; /* Stack label and card vertically */
+    align-items: center;
+    text-align: center;
+}
+
+.card-label {
+    font-size: 0.9em;
+    color: #b9d6ff; /* Adjust label color */
+    margin-bottom: 5px; /* Space between label and card */
+}
+
+.bot-deck, .player-deck, .bot-card, .player-card {
+    width: 80px;
+    height: auto;
+}
+
+.bot-deck {
+    top: 10px;
+}
+
+.player-deck {
+    bottom: 10px;
+}
+
+.players-info {
+    /* border: 2px solid #333; remove to help visualize container */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: space-between;
+    /* border: 2px solid #333; remove to help visualize container */
+}
+
+
+.deal-cards-button {
+    display: flex;
+    align-items: flex-end; 
+    background-color: #4f83ff;
+    color: white;
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.deal-cards-button:hover {
+    background-color: #3a6fbf;
+}
+
+.play-round-button {
+    display: flex;
+    align-items: flex-end;
+}
+
+.username {
+    color: #b9d6ff;
+    padding: 0;
+}
+
+.profile-picture {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.lobby-button {
+    display: flex;
+    align-items: flex-start; 
+    background-color: #4f83ff;
+    color: white;
+    font-size: 1em;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    margin-left: 10px;
+    margin-bottom: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.lobby-button:hover {
+    background-color: #3a6fbf;
+}

@@ -1,20 +1,9 @@
-.friends-list {
-    color: #b9d6ff;
-    text-align: center;
-}
-
-.friends-list h2 {
-    margin-bottom: 15px;
-}
-
 .friend-item {
     display: flex;
+    justify-content: center;
     align-items: center;
-    justify-content: flex-start;
-    margin: 10px 0;
+    margin: 5px 0;
     padding: 10px;
-    border: 1px solid #4f83ff;
-    border-radius: 8px;
     background-color: rgba(0,0,0,0.6);
 }
 
@@ -25,6 +14,20 @@
     margin-right: 10px;
 }
 
+.friend-info {
+    display: flex;
+    align-items: center;
+    font-size: 1.2em;
+    color: #b9d6ff;
+    margin-right: auto;
+}
+
+.friend-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.message-friend-button,
 .remove-friend-button {
     background-color: #4f83ff;
     color: white;
@@ -34,9 +37,20 @@
     border-radius: 8px;
     cursor: pointer;
     transition: background-color 0.3s;
-    margin-left: auto;
+}
+
+.message-friend-button:hover {
+    background-color: #3a6fbf;
+}
+
+.remove-friend-button {
+    background-color: #ff4d4d;
 }
 
 .remove-friend-button:hover {
-    background-color: #3a6fbf; /* Darker blue on hover */
+    background-color: #d43f3f;
+}
+
+p {
+    color: #b9d6ff;
 }

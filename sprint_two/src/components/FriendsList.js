@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { getFirestore, doc, getDoc, updateDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import Chat from './Chat';
 import './FriendsList.css'; 
@@ -9,7 +9,7 @@ const FriendsList = ({ currentUser }) => {
   const [selectedFriend, setSelectedFriend] = useState(null);
   const db = getFirestore();
   
-  const fetchFriends = async () => {
+  const fetchFriends = useCallback(async () => {
     setLoading(true);
   
     try {
@@ -42,7 +42,7 @@ const FriendsList = ({ currentUser }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [db, currentUser.uid]); // adding dependencies to dependency array
   
 
   const openChat = (friend) => {
@@ -103,7 +103,7 @@ const FriendsList = ({ currentUser }) => {
   // Automatically fetch friends when component mounts
   useEffect(() => {
     fetchFriends();
-  }, []);
+  }, [fetchFriends]);
 
   return (
     <div className="friends-list">

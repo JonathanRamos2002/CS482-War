@@ -62,7 +62,7 @@ h2 {
 .middle-container {
     display: flex; /* Use flexbox for middle components */
     flex: 0 0 auto; /* Prevent middle components from growing */
-  }
+}
 
 form {
     display: flex;
