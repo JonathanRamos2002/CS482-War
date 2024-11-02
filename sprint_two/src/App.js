@@ -9,6 +9,7 @@ import './styles.css';
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from 'animated-backgrounds';
 import Lobby from './components/Lobby';
+import GameTable from './components/GameTable';
 
 
 function App() {
@@ -63,6 +64,9 @@ function App() {
       </button> 
       <button className="cosmic-button" onClick={() => navigate('/lobby')}>
         Continue to Lobby
+      </button>
+      <button className="cosmic-button" onClick={() => navigate('/table')}>
+        Play Now
       </button>       
     </div>
   );
@@ -77,6 +81,9 @@ function App() {
       <FriendsList currentUser={user} />
       <button className="cosmic-button" onClick={() => navigate('/lobby')}>
         Continue to Lobby
+      </button>
+      <button className="cosmic-button" onClick={() => navigate('/table')}>
+        Play Now
       </button>
     </div>
   );
@@ -108,9 +115,9 @@ useEffect(() => {
         <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
         <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
         <Route path="/lobby" element={user ? <Lobby user={user} onLogout={handleLogout} isGuest={isGuest} /> : <Navigate to="/" />}/>
+        <Route path="/table" element={user ? <GameTable user={user} isGuest={isGuest} guestUsername={guestUsername} /> : <Navigate to="/" />}/>
       </Routes>
     </div>
-
   );
 }
 
