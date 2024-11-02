@@ -25,6 +25,52 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
     return user?.email;
   };
 
+  useEffect(() => {
+    const tablesRef = collection(db, 'tables');
+    const tablesQuery = query(tablesRef, orderBy('createdAt', 'desc'));
+
+    const unsubscribe = onSnapshot(tablesQuery, (snapshot) => {
+      const updatedTables = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setTables(updatedTables);
+    });
+    
+    const createNewTable = async () => {
+        if (tables.length >= 6) return;
+        
+        try {
+          const tablesRef = collection(db, 'tables');
+          const newTable = {
+            players: [{  // creator gets added (needs to add host functionality later)
+              id: getCurrentUserId(),
+              name: getCurrentUsername(),
+              joinedAt: new Date().toISOString()
+            }],
+            maxPlayers: 2,
+            status: 'waiting',
+            createdAt: new Date().toISOString(),
+            createdBy: {
+              id: getCurrentUserId(),
+              name: getCurrentUsername()
+            }
+          };
+    
+          await addDoc(tablesRef, newTable);
+          navigate('/table');  
+        } catch (error) {
+          console.error('Error creating table:', error);
+          alert('Failed to create table. Please try again.');
+        }
+      };
+
+
+    return () => unsubscribe();
+  }, [db]);
+
+
+
   return (
     <div className="lobby-container">
       <div className="lobby-header"></div>  
@@ -32,8 +78,9 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
       <button onClick={() => navigate('/profile')} className="profile-button">
           <UserIcon className="profile-icon" />
         </button>
-
     </div>
+    
+    
   );
 };
 
