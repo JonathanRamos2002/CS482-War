@@ -157,7 +157,19 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
                   </div>
                 </div>
               )}
+               <div className="creator-info">
+                Created by: {table.createdBy?.name}
+              </div>
             </div>
+
+            <button
+              onClick={() => joinTable(table.id)}
+              disabled={table.status === 'full'}
+              className="join-button"
+            >
+              {table.status === 'full' ? 'Table Full' : 'Join Game'}
+            </button>
+
           </div>
         ))}
 
