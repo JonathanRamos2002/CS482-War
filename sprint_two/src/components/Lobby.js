@@ -107,9 +107,16 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
         }
       };
 
-
-
-
+      const cleanupTable = async (tableId) => { // deleting live table from lobby
+        try {
+          const table = tables.find(t => t.id === tableId);
+          if (table?.createdBy?.id === getCurrentUserId()) {
+            await deleteDoc(doc(db, 'tables', tableId));
+          }
+        } catch (error) {
+          console.error('Error deleting table:', error);
+        }
+      };
 
 
 
