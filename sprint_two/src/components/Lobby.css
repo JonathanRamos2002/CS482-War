@@ -1,0 +1,40 @@
+.lobby-container {
+    padding: 1.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    color: #b9d6ff;
+  }
+  
+  .lobby-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+  
+  .lobby-title {
+    font-size: 1.875rem;
+    font-weight: bold;
+    color: #b9d6ff;
+  }
+  
+  .profile-button {
+    padding: 0.5rem;
+    border-radius: 9999px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .profile-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .profile-icon {
+    width: 1.5rem;
+    height: 1.5rem;
+    color: #b9d6ff;
+  }
+  
+  
