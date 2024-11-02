@@ -36,6 +36,8 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
       }));
       setTables(updatedTables);
     });
+    return () => unsubscribe();
+}, [db]);
     
     const createNewTable = async () => {
         if (tables.length >= 6) return;
@@ -64,10 +66,51 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
           alert('Failed to create table. Please try again.');
         }
       };
+      
+      const joinTable = async (tableId) => {
+        const tableRef = doc(db, 'tables', tableId);
+        const table = tables.find(t => t.id === tableId);
+        
+        if (!table) return;
+    
+        if (table.players.length >= table.maxPlayers) {
+          alert('This table is full!');
+          return;
+        }
+    
+        const userId = getCurrentUserId();
+    
+        if (table.players.some(p => p.id === userId)) { // checks if player is in table
+          navigate('/table');
+          return;
+        }
+    
+        const currentPlayer = { // shows when the player joined table
+          id: userId,
+          name: getCurrentUsername(),
+          joinedAt: new Date().toISOString()
+        };
+    
+        try {
+          const updatedPlayers = [...table.players, currentPlayer];
+          await updateDoc(tableRef, {
+            players: updatedPlayers,
+            status: updatedPlayers.length >= table.maxPlayers ? 'full' : 'waiting' // status of table in lobby
+          });
+    
+          navigate('/table');
+        } catch (error) {
+          console.error('Error joining table:', error);
+          console.log('Current user:', { userId: getCurrentUserId(), username: getCurrentUsername(), isGuest });
+          console.log('Table data:', table);
+          alert('Failed to join table. Please try again.');
+        }
+      };
 
 
-    return () => unsubscribe();
-  }, [db]);
+
+
+
 
 
 
@@ -81,7 +124,9 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
     </div>
     
     
+    
   );
+
 };
 
 export default Lobby;
