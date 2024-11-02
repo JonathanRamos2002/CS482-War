@@ -66,7 +66,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
           alert('Failed to create table. Please try again.');
         }
       };
-      
+
       const joinTable = async (tableId) => {
         const tableRef = doc(db, 'tables', tableId);
         const table = tables.find(t => t.id === tableId);
@@ -116,17 +116,48 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
 
   return (
     <div className="lobby-container">
-      <div className="lobby-header"></div>  
-      <h2>Welcome to the Lobby!</h2>
-      <button onClick={() => navigate('/profile')} className="profile-button">
+      <div className="lobby-header">
+        <h2 className="lobby-title">Welcome to the Lobby!</h2>
+        <button onClick={() => navigate('/profile')} className="profile-button">
           <UserIcon className="profile-icon" />
         </button>
-    </div>
-    
-    
-    
-  );
+      </div>
 
+      <div className="tables-grid">
+        {tables.map((table) => (
+          <div key={table.id} className="table-card">
+            <div className="table-header">
+              <h3 className="table-title">Table #{table.id.slice(0, 4)}</h3>
+              <div className="players-count">
+                <Users className="w-4 h-4" />
+                <span>{table.players.length}/{table.maxPlayers}</span>
+              </div>
+            </div>
+            
+            <div className="table-content">
+              <div className="table-status">
+                Status: <span className="capitalize">{table.status}</span>
+              </div>
+              {table.players.length > 0 && (
+                <div className="players-list">
+                  <div className="players-title">Players:</div>
+                  <div className="players-tags">
+                    {table.players.map(player => (
+                      <span key={player.id} className="player-tag">
+                        {player.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+
+      </div>
+
+    </div>
+  );
 };
 
 export default Lobby;
