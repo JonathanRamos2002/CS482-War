@@ -169,6 +169,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
             >
               {table.status === 'full' ? 'Table Full' : 'Join Game'}
             </button>
+
             {table.createdBy?.id === getCurrentUserId() && (
               <button
                 onClick={() => cleanupTable(table.id)}
@@ -179,11 +180,21 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
             )}
           </div>
         ))}
-
+        {tables.length < 6 && (
+          <button onClick={createNewTable} className="create-table-button">
+            <PlusCircle className="create-icon" />
+            <span className="create-text">Create New Table</span>
+          </button>
+        )}
       </div>
+
+      {tables.length >= 6 && (
+        <p className="max-tables-message">
+          Maximum number of tables reached (6)
+        </p>
+      )}
 
     </div>
   );
 };
-
 export default Lobby;
