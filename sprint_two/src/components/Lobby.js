@@ -169,7 +169,14 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
             >
               {table.status === 'full' ? 'Table Full' : 'Join Game'}
             </button>
-
+            {table.createdBy?.id === getCurrentUserId() && (
+              <button
+                onClick={() => cleanupTable(table.id)}
+                className="delete-button"
+              >
+                Delete Table
+              </button>
+            )}
           </div>
         ))}
 
