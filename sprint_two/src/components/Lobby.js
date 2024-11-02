@@ -27,7 +27,12 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
 
   return (
     <div className="lobby-container">
+      <div className="lobby-header"></div>  
       <h2>Welcome to the Lobby!</h2>
+      <button onClick={() => navigate('/profile')} className="profile-button">
+          <UserIcon className="profile-icon" />
+        </button>
+
     </div>
   );
 };
