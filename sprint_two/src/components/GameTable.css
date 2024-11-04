@@ -16,7 +16,7 @@
 .game-board {
     /* border: 2px solid #333; remove to help visualize container */
     min-height: 400px;
-    background-color: rgba(0, 0, 0, 0.7);
+    /* background-color: rgba(0, 0, 0, 0.7); remove to help visualize container */
     display: flex; /* Use flex display */
     flex-direction: column; /* Stack children vertically */
     justify-content: space-between; /* Space out items */
