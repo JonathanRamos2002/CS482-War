@@ -40,11 +40,18 @@ function GameTableMultiplayer({ user1 }) {
     const [imageFetched1, setImageFetched1] = useState(false);
     const [selectedImage1, setSelectedImage1] = useState(placeholder);
     const [username1, setUsername1] = useState(user1.email || '');
+    const [points1, setPoints1] = useState(0);
+    const [card1, setCard1] = useState({});
+    const [deck1, setDeck1] = useState([]);
 
     // User2 Info
     const [imageFetched2, setImageFetched2] = useState(false);
     const [selectedImage2, setSelectedImage2] = useState(placeholder);
     const [username2, setUsername2] = useState('');
+    const [points2, setPoints2] = useState(0);
+    const [card2, setCard2] = useState({});
+    const [deck2, setDeck2] = useState([]);
+
  
     // Game state
     const [gameMessage, setGameMessage] = useState("Click 'Deal Cards' to start the game.");
@@ -85,7 +92,7 @@ function GameTableMultiplayer({ user1 }) {
                 setImage(url);
                 setFetched(true);
             } catch (error) {
-                console.log('Avatar not found, using placeholder:', error.message);
+                console.error('Avatar not found, using placeholder:', error.message);
             }
         };
 
@@ -97,7 +104,9 @@ function GameTableMultiplayer({ user1 }) {
             const playerids = gameDocuments[0].playerIDs
             setCreatorUID(gameDocuments[0].createdBy.id);
             const user2UID = playerids[0] === user1.uid ? playerids[1] : playerids[0];
-            fetchProfileImage(user2UID, setSelectedImage2, setImageFetched2);
+            if(user2UID !== undefined){
+                fetchProfileImage(user2UID, setSelectedImage2, setImageFetched2);
+            }
         }
     }, [user1, gameDocuments, imageFetched1, imageFetched2]);
 
@@ -112,7 +121,7 @@ function GameTableMultiplayer({ user1 }) {
                     setUsername(userData.username);
                 }
             } catch (error) {
-                    console.error(error);
+                    console.error("error getting username of", userUID, error);
             }
          };
 
@@ -123,16 +132,59 @@ function GameTableMultiplayer({ user1 }) {
          if(gameDocuments) {
             const playerids = gameDocuments[0].playerIDs
             const user2UID = playerids[0] === user1.uid ? playerids[1] : playerids[0];
-            getUsername(user2UID, setUsername2);
+            if(user2UID !== undefined){
+                getUsername(user2UID, setUsername2);
+            }
          }
 
-     }, [user1, gameDocuments]);
+     }, [db, user1, gameDocuments]);
 
+
+    // set values from db
+    useEffect(() => {
+        const setData = async () => {
+            if(gameDocuments){
+                const tableID = gameDocuments[0].id;
+                const tablesRef = doc(db, 'tables', tableID);
+                try {
+                    const tableDoc = await getDoc(tablesRef);
+                    if (tableDoc.exists()) {
+                        const tableData = tableDoc.data();
+                        console.log(tableData);
+                        tableData.players[0].id === user1.uid ? setPoints1(tableData.players[0].score) : setPoints1(tableData.players[1].score);
+                        tableData.players[0].id === user1.uid ? setPoints2(tableData.players[1].score) : setPoints2(tableData.players[0].score);
+
+                        tableData.players[0].id === user1.uid ? setCard1(tableData.players[0].currentCard) : setCard1(tableData.players[1].currentCard);
+                        tableData.players[0].id === user1.uid ? setCard2(tableData.players[1].currentCard) : setCard2(tableData.players[0].currentCard);
+
+                        tableData.players[0].id === user1.uid ? setDeck1(tableData.players[0].deck) : setDeck1(tableData.players[1].deck);
+                        tableData.players[0].id === user1.uid ? setDeck2(tableData.players[1].deck) : setDeck2(tableData.players[0].deck);
+
+                        console.log("points1:", points1);
+                        console.log("points2:", points2);
+
+                        console.log("card1:", card1);
+                        console.log("card2:", card2);
+
+                        console.log("deck1:", deck1);
+                        console.log("deck2:", deck2);
+
+                    }
+                } catch (error) {
+                    console.error("error getting data from db", error);
+                }
+            }
+        };
+
+        
+        setData();
+        
+    }, [db, gameDocuments, points1, points2, user1, card1, card2, deck1, deck2]);
 
 
     const beginGame = async () => {
         if (!db || !gameDocuments || !gameDocuments[0] || !user1) {
-            console.log("Database, game documents, or user data is missing");
+            console.error("Database, game documents, or user data is missing");
             return;
         }
     
@@ -179,13 +231,12 @@ function GameTableMultiplayer({ user1 }) {
                         score: isUser1 ? updatedPlayerDeck1.length : updatedPlayerDeck2.length,
                     };
                 });
-                console.log("Updated Players:", updatedPlayers);
-    
+                //console.log("Updated Players:", updatedPlayers);
                 await updateDoc(tablesRef, { players: updatedPlayers, status: "game started" });
-                console.log("Updated player fields");
+                //console.log("Updated player fields");
                 setGameMessage("Game Started!");
             } else {
-                console.log("Table document not found");
+                console.error("Table document not found");
             }
         } catch (error) {
             console.error("Error updating player fields:", error);
@@ -197,13 +248,13 @@ function GameTableMultiplayer({ user1 }) {
         <div className='game-container'>
             <div className="players-info">
                 <img src={selectedImage2} alt="Player 2 avatar" className="profile-picture" />
-                <p className='username'>{username2} : {0}</p>
+                <p className='username'>{username2} : {points2}</p>
             </div>
 
 
             <div className="game-board">
                 {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
-                { ( !gameDocuments ) && (
+                { (deck1 === undefined || deck2 === undefined || deck1.length === 0 || deck2.length === 0) && (
                     <img
                         src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
                         alt="Backside of a Card"
@@ -216,7 +267,7 @@ function GameTableMultiplayer({ user1 }) {
 
             <div className="players-info">
                 <img src={selectedImage1} alt="Player 1 Avatar" className="profile-picture" />
-                <p className='username'>{username1} : {0}</p>
+                <p className='username'>{username1} : {points1}</p>
             </div>
             <div className="game-controls">
                 <button className='lobby-button' onClick={() => navigate('/profile')}>Go Back to Profile</button>
