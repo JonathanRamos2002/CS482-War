@@ -9,12 +9,16 @@ const Chat = ({ currentUser, friend, onClose }) => {
   const messageContainerRef = useRef(null);
 
   useEffect(() => {
-    const chatId = [currentUser.uid, friend.uid].sort().join('_');
+    const sortedUids = [currentUser.uid, friend.uid].sort();
+    console.log("Sorted UIDs:", sortedUids);
+    const chatId = sortedUids.join('_');
+
     const chatDocRef = doc(db, 'chats', chatId);
 
     const unsubscribe = onSnapshot(chatDocRef, (doc) => {
       if (doc.exists()) {
         const data = doc.data();
+        console.log("Fetched messages:", data.messages);
         setMessages(data.messages || []);
       } else {
         setMessages([]);
@@ -58,12 +62,14 @@ const Chat = ({ currentUser, friend, onClose }) => {
       console.error('Error sending message:', error);
     }
   };
-
+  
   return (
     <div className="chat-container">
-      <div className="chat-header">Chat with {friend.name}</div>
+      <div className="chat-header">
+        Chat With {friend && friend.username ? friend.username : "Friend"}
+        </div>
       <div className="message-container" ref={messageContainerRef}>
-        {[...messages].reverse().map((msg, index) => (
+        {[...messages].map((msg, index) => (
           <p key={index} className={`message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`}>
             <strong>{msg.senderId === currentUser.uid ? 'You' : friend.name}: </strong>{msg.text}
           </p>
