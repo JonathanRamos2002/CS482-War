@@ -1,7 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { getFirestore, doc, setDoc, arrayUnion, onSnapshot, getDoc, updateDoc } from 'firebase/firestore';
 import '../Chat.css';
-
+/* CHECK THIS OUT Brett, I would like to highlight this section of code as it establishes the foundation 
+for users being able to chat with each other. This code sets up Firebase so that users have their own chat
+document where all messages are stored and can be pulled when they message each other.
+*/
 const Chat = ({ currentUser, friend, onClose }) => {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
