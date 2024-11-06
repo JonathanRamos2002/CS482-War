@@ -1,128 +1,234 @@
 import React from 'react';
-import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import UserAuth from './UserAuth';
+import { auth, db } from '../firebase';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { setDoc, doc } from 'firebase/firestore';
+import { ref, getStorage, getDownloadURL } from 'firebase/storage';
+import '@testing-library/jest-dom';
 
+// Mock CSS
+jest.mock('./UserAuth.css', () => ({}));
 
-// Mock Firebase Auth functions
-const mockCreateUserWithEmailAndPassword = jest.fn();
-const mockSignInWithEmailAndPassword = jest.fn();
-const mockSendPasswordResetEmail = jest.fn();
+// Mock Firebase modules
+jest.mock('../firebase', () => ({
+  auth: {},
+  db: {},
+}));
 
-// Mock implementation for the UserAuth component props
-const mockOnLogin = jest.fn();
-const mockOnGuestLogin = jest.fn();
-
-// Mocking Firebase functions
 jest.mock('firebase/auth', () => ({
-  getAuth: jest.fn(),
-  createUserWithEmailAndPassword: (...args) => mockCreateUserWithEmailAndPassword(...args),
-  signInWithEmailAndPassword: (...args) => mockSignInWithEmailAndPassword(...args),
-  sendPasswordResetEmail: (...args) => mockSendPasswordResetEmail(...args),
+  createUserWithEmailAndPassword: jest.fn(),
+  signInWithEmailAndPassword: jest.fn(),
+  sendPasswordResetEmail: jest.fn(),
+}));
+
+jest.mock('firebase/firestore', () => ({
+  setDoc: jest.fn(),
+  doc: jest.fn(),
+}));
+
+jest.mock('firebase/storage', () => ({
+  ref: jest.fn(),
+  getStorage: jest.fn(),
+  getDownloadURL: jest.fn(),
 }));
 
 describe('UserAuth Component', () => {
+  const mockOnLogin = jest.fn();
+  const mockOnGuestLogin = jest.fn();
+  const mockEmail = 'test@example.com';
+  const mockPassword = 'password123';
+
   beforeEach(() => {
     jest.clearAllMocks();
-    // Mock alert
+    process.env.PUBLIC_URL = '';
+    global.console.error = jest.fn();
+    global.console.log = jest.fn();
     global.alert = jest.fn();
   });
 
-  test('allows user to create a new account', async () => {
-    mockCreateUserWithEmailAndPassword.mockResolvedValueOnce({
-      user: { email: 'newuser@example.com' }
+  test('renders login form by default', () => {
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('Password')).toBeInTheDocument();
+    expect(screen.getByText('Enter the Cosmos')).toBeInTheDocument();
+    expect(screen.getByText('Play as Guest')).toBeInTheDocument();
+  });
+
+  test('switches between login and signup forms', () => {
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Sign up now'));
+    expect(screen.getByText('Join the Revolution')).toBeInTheDocument();
+    
+    fireEvent.click(screen.getByText('Log in here'));
+    expect(screen.getByText('Enter the Cosmos')).toBeInTheDocument();
+  });
+
+  test('handles successful login', async () => {
+    signInWithEmailAndPassword.mockResolvedValueOnce({ user: { email: mockEmail } });
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: mockEmail } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: mockPassword } });
+    fireEvent.click(screen.getByText('Enter the Cosmos'));
+
+    await waitFor(() => {
+      expect(mockOnLogin).toHaveBeenCalled();
+    });
+  });
+
+  test('handles login errors', async () => {
+    const wrongPasswordError = { code: 'auth/wrong-password', message: 'Wrong password' };
+    signInWithEmailAndPassword.mockRejectedValueOnce(wrongPasswordError);
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: mockEmail } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: mockPassword } });
+    fireEvent.click(screen.getByText('Enter the Cosmos'));
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalledWith('Incorrect password. Please try again.');
     });
 
-    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    // Test generic error
+    signInWithEmailAndPassword.mockRejectedValueOnce({ code: 'auth/other-error', message: 'Other error' });
+    fireEvent.click(screen.getByText('Enter the Cosmos'));
 
-    // Simulate toggling to sign-up mode
-    fireEvent.click(screen.getByText(/sign up now/i));
-
-    // Simulate entering email and password
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'newuser@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
-
-    // Simulate clicking the Sign Up button
-    fireEvent.click(screen.getByText(/sign up/i));
-
-    // Wait for the mock to be called
-    await waitFor(() => expect(mockCreateUserWithEmailAndPassword).toHaveBeenCalledTimes(1));
-
-    // Verify that onLogin callback was called
-    expect(mockOnLogin).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalledWith('Error logging in. Please check your credentials.');
+    });
   });
 
-  test('allows user to log in', async () => {
-    mockSignInWithEmailAndPassword.mockResolvedValueOnce({
-      user: { email: 'existinguser@example.com' }
+  test('handles successful signup', async () => {
+    const mockUser = { uid: 'test-uid', email: mockEmail };
+    createUserWithEmailAndPassword.mockResolvedValueOnce({ user: mockUser });
+    getDownloadURL.mockResolvedValueOnce('avatar-url');
+    setDoc.mockResolvedValueOnce();
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Sign up now'));
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: mockEmail } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: mockPassword } });
+    fireEvent.click(screen.getByText('Join the Revolution'));
+
+    await waitFor(() => {
+      expect(mockOnLogin).toHaveBeenCalled();
+      expect(setDoc).toHaveBeenCalled();
+    });
+  });
+
+  test('handles signup errors', async () => {
+    createUserWithEmailAndPassword.mockRejectedValueOnce({ 
+      code: 'auth/email-already-in-use',
+      message: 'Email already in use'
+    });
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Sign up now'));
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: mockEmail } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: mockPassword } });
+    fireEvent.click(screen.getByText('Join the Revolution'));
+
+    await waitFor(() => {
+      expect(global.alert).toHaveBeenCalledWith('This email is already in use. Please log in instead.');
     });
 
-    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
-
-    // Simulate entering email and password
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'existinguser@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
-
-    // Simulate clicking the Log In button
-    fireEvent.click(screen.getByText(/log in/i));
-
-    // Wait for the mock to be called
-    await waitFor(() => expect(mockSignInWithEmailAndPassword).toHaveBeenCalledTimes(1));
-
-    // Verify that onLogin callback was called
-    expect(mockOnLogin).toHaveBeenCalled();
-  });
-
-  test('allows user to create a guest account', () => {
-    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
-
-    // Simulate clicking the Play as Guest button
-    fireEvent.click(screen.getByText(/play as guest/i));
-
-    // Verify that the guest login callback was called
-    expect(mockOnGuestLogin).toHaveBeenCalledWith(expect.stringMatching(/guest\d{5}/));
-
-    // Verify guest mode is activated
-    expect(screen.getByText(/you are playing as a guest/i)).toBeInTheDocument();
-  });
-
-  test('displays error when trying to sign up with an existing email', async () => {
-    // Mock "email already in use" error
-    mockCreateUserWithEmailAndPassword.mockRejectedValueOnce({
-      code: 'auth/email-already-in-use'
+    // Test generic signup error
+    createUserWithEmailAndPassword.mockRejectedValueOnce({ 
+      code: 'auth/other-error',
+      message: 'Other error'
     });
+    fireEvent.click(screen.getByText('Join the Revolution'));
 
-    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
-
-    // Simulate toggling to sign-up mode
-    fireEvent.click(screen.getByText(/sign up now/i));
-
-    // Simulate entering email and password
-    fireEvent.change(screen.getByPlaceholderText(/email/i), { target: { value: 'existinguser@example.com' } });
-    fireEvent.change(screen.getByPlaceholderText(/password/i), { target: { value: 'password123' } });
-
-    // Simulate clicking the Sign Up button
-    fireEvent.click(screen.getByText(/sign up/i));
-
-    // Wait for the alert to be called
-    await waitFor(() => expect(global.alert).toHaveBeenCalledWith('This email is already in use. Please log in instead.'));
+    await waitFor(() => {
+      expect(global.console.error).toHaveBeenCalled();
+    });
   });
 
-  test('sends password reset email', async () => {
-    mockSendPasswordResetEmail.mockResolvedValueOnce();
-
+  test('handles guest login', () => {
     render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Play as Guest'));
+    
+    expect(mockOnGuestLogin).toHaveBeenCalled();
+    expect(screen.getByText(/Welcome, guest\d{5}!/)).toBeInTheDocument();
+  });
 
-    // Simulate clicking the Forgot Password button
-    fireEvent.click(screen.getByText(/forgot password\?/i));
+  test('handles password reset flow', async () => {
+    sendPasswordResetEmail.mockResolvedValueOnce();
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Forgot Password?'));
+    expect(screen.getByText('Reset Your Password')).toBeInTheDocument();
+    
+    fireEvent.change(screen.getByPlaceholderText('Enter your email'), { 
+      target: { value: mockEmail } 
+    });
+    fireEvent.click(screen.getByText('Reset Password'));
 
-    // Simulate entering email
-    fireEvent.change(screen.getByPlaceholderText(/enter your email/i), { target: { value: 'user@example.com' } });
+    await waitFor(() => {
+      expect(sendPasswordResetEmail).toHaveBeenCalledWith(auth, mockEmail);
+    });
+  });
 
-    // Simulate clicking the Reset Password button
-    fireEvent.click(screen.getByText(/reset password/i));
+  test('handles password reset errors', async () => {
+    sendPasswordResetEmail.mockRejectedValueOnce(new Error('Reset failed'));
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Forgot Password?'));
+    fireEvent.change(screen.getByPlaceholderText('Enter your email'), { 
+      target: { value: mockEmail } 
+    });
+    fireEvent.click(screen.getByText('Reset Password'));
 
-    // Wait for the mock to be called
-    await waitFor(() => expect(mockSendPasswordResetEmail).toHaveBeenCalledWith(expect.any(Object), 'user@example.com'));
+    await waitFor(() => {
+      expect(global.console.error).toHaveBeenCalled();
+    });
+  });
+
+  test('handles navigation between forms', () => {
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    // Go to password reset
+    fireEvent.click(screen.getByText('Forgot Password?'));
+    expect(screen.getByText('Reset Your Password')).toBeInTheDocument();
+    
+    // Back to login
+    fireEvent.click(screen.getByText('Back to Login'));
+    expect(screen.getByText('Enter the Cosmos')).toBeInTheDocument();
+  });
+
+  test('handles avatar not found during signup', async () => {
+    const mockUser = { uid: 'test-uid', email: mockEmail };
+    createUserWithEmailAndPassword.mockResolvedValueOnce({ user: mockUser });
+    getDownloadURL.mockRejectedValueOnce(new Error('Avatar not found'));
+    setDoc.mockResolvedValueOnce();
+    
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    fireEvent.click(screen.getByText('Sign up now'));
+    fireEvent.change(screen.getByPlaceholderText('Email'), { target: { value: mockEmail } });
+    fireEvent.change(screen.getByPlaceholderText('Password'), { target: { value: mockPassword } });
+    fireEvent.click(screen.getByText('Join the Revolution'));
+
+    await waitFor(() => {
+      expect(global.console.log).toHaveBeenCalledWith('Avatar not found, using placeholder image');
+    });
+  });
+
+  test('renders footer links', () => {
+    render(<UserAuth onLogin={mockOnLogin} onGuestLogin={mockOnGuestLogin} />);
+    
+    expect(screen.getByText('Explore Cosmos')).toBeInTheDocument();
+    expect(screen.getByText('Rules of War')).toBeInTheDocument();
+    expect(screen.getByText('Galactic Support')).toBeInTheDocument();
   });
 });
