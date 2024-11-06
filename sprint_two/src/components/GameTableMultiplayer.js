@@ -182,6 +182,11 @@ function GameTableMultiplayer({ user1 }) {
     }, [db, gameDocuments, points1, points2, user1, card1, card2, deck1, deck2]);
 
 
+    /*  CHECK THIS OUT Jonathan, I would like to highlight this section of code because it establishes the foundation for the multiplayer game. 
+        It creates the deck, shuffles the deck and then deals the cards evenly to each player. 
+        When the cards are dealt, it is reflected in  our Database (Firebase/Firestore) which ensures the live gamestate is reflected for both players on the front-end. 
+        Additionally, this code also handles errors appropriately 
+    */
     const beginGame = async () => {
         if (!db || !gameDocuments || !gameDocuments[0] || !user1) {
             console.error("Database, game documents, or user data is missing");
