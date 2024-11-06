@@ -10,6 +10,7 @@ import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { AnimatedBackground } from 'animated-backgrounds';
 import Lobby from './components/Lobby';
 import GameTable from './components/GameTable';
+import GameTableMultiplayer from './components/GameTableMultiplayer';
 
 
 function App() {
@@ -116,6 +117,7 @@ useEffect(() => {
         <Route path="/guest" element={user && isGuest ? GuestPage : <Navigate to="/" />} />
         <Route path="/lobby" element={user ? <Lobby user={user} onLogout={handleLogout} isGuest={isGuest} /> : <Navigate to="/" />}/>
         <Route path="/table" element={user ? <GameTable user={user} isGuest={isGuest} guestUsername={guestUsername} /> : <Navigate to="/" />}/>
+        <Route path="/table-multi" element={user ? <GameTableMultiplayer user1={user} /> : <Navigate to="/" />}/>
       </Routes>
     </div>
   );
