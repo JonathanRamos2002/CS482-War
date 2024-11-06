@@ -160,8 +160,8 @@ function GameTableMultiplayer({ user1 }) {
                         tableData.players[0].id === user1.uid ? setDeck1(tableData.players[0].deck) : setDeck1(tableData.players[1].deck);
                         tableData.players[0].id === user1.uid ? setDeck2(tableData.players[1].deck) : setDeck2(tableData.players[0].deck);
 
-                        console.log("points1:", points1);
-                        console.log("points2:", points2);
+                        //console.log("points1:", points1);
+                        //console.log("points2:", points2);
 
                         console.log("card1:", card1);
                         console.log("card2:", card2);
@@ -242,6 +242,83 @@ function GameTableMultiplayer({ user1 }) {
             console.error("Error updating player fields:", error);
         }
     };
+
+    const playRound = async () => {
+        if (!deck1.length || !deck2.length) {
+            setGameMessage("Game over! One of the players is out of cards.");
+            return;
+        }
+    
+        const tableID = gameDocuments[0].id;
+        const tablesRef = doc(db, 'tables', tableID);
+    
+        // Draw a card from each deck
+        let newCard1 = deck1[0];
+        let newCard2 = deck2[0];
+    
+        // Remove the drawn card from each deck
+        let updatedDeck1 = deck1.slice(1);
+        let updatedDeck2 = deck2.slice(1);
+    
+        // Update each player's score based on card comparison
+        let updatedPoints1 = points1;
+        let updatedPoints2 = points2;
+        let roundMessage;
+    
+        const cardValue1 = CARD_VALUE_MAP[newCard1.value];
+        const cardValue2 = CARD_VALUE_MAP[newCard2.value];
+    
+        if (cardValue1 > cardValue2) {
+            roundMessage = `${username1} last won!`;
+            updatedDeck1 = [...updatedDeck1, newCard1, newCard2];
+            updatedPoints1 = updatedDeck1.length;
+            updatedPoints2 = updatedDeck2.length;
+        } else if (cardValue1 < cardValue2) {
+            roundMessage = `${username2} last won!`;
+            updatedDeck2 = [...updatedDeck2, newCard1, newCard2];
+            updatedPoints1 = updatedDeck1.length;
+            updatedPoints2 = updatedDeck2.length;
+        } else {
+            roundMessage = "WAR!";
+            // for now just add them back into the deck
+            updatedDeck1 = [...updatedDeck1, newCard1];
+            updatedDeck2 = [...updatedDeck2, newCard2];
+            updatedPoints1 = updatedDeck1.length;
+            updatedPoints2 = updatedDeck2.length;
+        }
+    
+        // Update Firestore with the new scores, decks, and current cards
+        const updatedPlayers = gameDocuments[0].players.map((player) => {
+            if (player.id === user1.uid) {
+                return {
+                    ...player,
+                    currentCard: updatedDeck1[0],
+                    deck: updatedDeck1,
+                    score: updatedPoints1,
+                };
+            } else {
+                return {
+                    ...player,
+                    currentCard: updatedDeck2[0],
+                    deck: updatedDeck2,
+                    score: updatedPoints2,
+                };
+            }
+        });
+    
+        try {
+            await updateDoc(tablesRef, { players: updatedPlayers });
+            setPoints1(updatedPoints1);
+            setPoints2(updatedPoints2);
+            setCard1(newCard1);
+            setCard2(newCard2);
+            setDeck1(updatedDeck1);
+            setDeck2(updatedDeck2);
+            setGameMessage(roundMessage);
+        } catch (error) {
+            console.error("Error updating game data in Firestore:", error);
+        }
+    };
     
     
     return (
@@ -262,6 +339,50 @@ function GameTableMultiplayer({ user1 }) {
                     />
                 )}
 
+                {/* Show the bot's deck */}
+                { (deck1 && deck2) && (deck2.length > 0) && (
+                    <img
+                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                        alt="Backside of the player 2's Deck"
+                        className="bot-deck"
+                    />
+                )}
+
+                {/* Show the chosen cards */}
+                <div className='drawn-cards-container'>
+                    { ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
+                        <div className="card-wrapper">
+                            <span className="card-label">{username2}</span>
+                            <img
+                                src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
+                                alt="Player 2's Card"
+                                className="bot-card"
+                            />
+                        </div>
+                    )}
+                
+                    { ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
+                        <div className="card-wrapper">
+                            <span className="card-label">{username1}</span>
+                            <img
+                                src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
+                                alt="Player 1's Card"
+                                className="player-card"
+                            />
+                        </div>
+                    )}
+                
+                </div>
+
+                {/* Show the player's deck */}
+                { (deck1 && deck2) && deck1.length > 0 && (
+                    <img
+                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                        alt="Backside of the player 1's Deck"
+                        className="player-deck"
+                    />
+                )}
+
             </div>
 
 
@@ -273,7 +394,7 @@ function GameTableMultiplayer({ user1 }) {
                 <button className='lobby-button' onClick={() => navigate('/profile')}>Go Back to Profile</button>
                 <p className="game-message">{gameMessage}</p>
                 { creatorUID === user1.uid && <button className='lobby-button' onClick={beginGame} >Deal Cards</button>}
-                <button className='lobby-button'>Play Round</button>
+                <button className='lobby-button' onClick={playRound}>Play Round</button>
                 <button className='lobby-button'>Restart</button>
             </div>
         </div>
