@@ -38,14 +38,14 @@
 
 .message.sent {
   align-self: flex-end;
-  background-color: #dcf8c6;
-  color: #333333;
+  background-color: #007AFF;
+  color: white;
 }
 
 .message.received {
   align-self: flex-start;
-  background-color: lightblue;
-  color: #333333;
+  background-color: #A9A9B0;
+  color: white;
   border: 1px solid #ddd;
 }
 
@@ -98,3 +98,4 @@
 .close-chat:hover {
   background-color: #f0f0f0;
 }
+

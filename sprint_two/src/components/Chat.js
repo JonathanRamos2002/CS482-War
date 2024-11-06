@@ -71,7 +71,7 @@ const Chat = ({ currentUser, friend, onClose }) => {
       <div className="message-container" ref={messageContainerRef}>
         {[...messages].map((msg, index) => (
           <p key={index} className={`message ${msg.senderId === currentUser.uid ? 'sent' : 'received'}`}>
-            <strong>{msg.senderId === currentUser.uid ? 'You' : friend.name}: </strong>{msg.text}
+            <strong>{msg.senderId === currentUser.uid ? 'You' : friend.username}: </strong>{msg.text}
           </p>
         ))}
       </div>
