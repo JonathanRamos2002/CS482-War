@@ -281,10 +281,47 @@ function GameTableMultiplayer({ user1 }) {
         } else {
             roundMessage = "WAR!";
             // for now just add them back into the deck
-            updatedDeck1 = [...updatedDeck1, newCard1];
-            updatedDeck2 = [...updatedDeck2, newCard2];
-            updatedPoints1 = updatedDeck1.length;
-            updatedPoints2 = updatedDeck2.length;
+            //updatedDeck1 = [...updatedDeck1, newCard1];
+            //updatedDeck2 = [...updatedDeck2, newCard2];
+            //updatedPoints1 = updatedDeck1.length;
+            //updatedPoints2 = updatedDeck2.length;
+
+            let warCards = [];
+            warCards.push(newCard1);
+            warCards.push(newCard2);
+
+            for (let i = 0; i < 3; i++) {
+                if (deck1.length > 0) warCards.push(deck1[i]);
+                if (deck2.length > 0) warCards.push(deck2[i]);
+                updatedDeck1 = deck1.slice(3);
+                updatedDeck2 = deck2.slice(3);
+            }
+
+            if (deck1.length === 0){ 
+                setGameMessage(`${username2} wins the game! ${username1} ran out cards during war :(`);
+                return;
+            } else if (deck2.length === 0) {
+                setGameMessage(`${username1} wins the game :) ${username2} ran out cards during war!`);
+                return;
+            }
+
+            const warCard1 = deck1[0];
+            const warCard2 = deck2[0];
+            warCards.push(warCard1, warCard2);
+            updatedDeck1 = deck1.slice(1);
+            updatedDeck2 = deck2.slice(1);
+
+            const warCard1Value = CARD_VALUE_MAP[warCard1.value];
+            const warCard2Value = CARD_VALUE_MAP[warCard2.value];
+
+            if (warCard1Value > warCard2Value) {
+                updatedDeck1 = [...updatedDeck1, ...warCards];
+                roundMessage = `${username1} won the war!`;
+            } else if (warCard1Value < warCard2Value) {
+                updatedDeck2 = [...updatedDeck2, ...warCards];
+                roundMessage = `${username2} won the war!`;
+            }
+
         }
     
         // Update Firestore with the new scores, decks, and current cards
