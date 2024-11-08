@@ -56,8 +56,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
             createdBy: {
               id: getCurrentUserId(),
               name: getCurrentUsername()
-            },
-            playerIDs: [getCurrentUserId()]
+            }
           };
     
           await addDoc(tablesRef, newTable);
@@ -83,7 +82,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
         const userId = getCurrentUserId();
     
         if (table.players.some(p => p.id === userId)) { // checks if player is in table
-          navigate('/table-multi');
+          navigate('/table');
           return;
         }
     
@@ -95,14 +94,12 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
     
         try {
           const updatedPlayers = [...table.players, currentPlayer];
-          const updatedPlayerIDs = [...table.playerIDs, userId];
           await updateDoc(tableRef, {
-            playerIDs: updatedPlayerIDs,
             players: updatedPlayers,
             status: updatedPlayers.length >= table.maxPlayers ? 'full' : 'waiting' // status of table in lobby
           });
     
-          navigate('/table-multi');
+          navigate('/table');
         } catch (error) {
           console.error('Error joining table:', error);
           console.log('Current user:', { userId: getCurrentUserId(), username: getCurrentUsername(), isGuest });
@@ -192,7 +189,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
         )}
       </div>
 
-      {tables.length >= 6 && (
+      {tables.length >= 6 && ( //check this out
         <p className="max-tables-message">
           Maximum number of tables reached (6)
         </p>
