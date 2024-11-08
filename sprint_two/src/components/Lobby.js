@@ -192,7 +192,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
         )}
       </div>
 
-      {tables.length >= 6 && (
+      {tables.length >= 6 && ( //check this out 
         <p className="max-tables-message">
           Maximum number of tables reached (6)
         </p>
