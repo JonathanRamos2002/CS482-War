@@ -1,0 +1,274 @@
+\section{Iterations}
+
+%[[ The requirements analysis identifies \textbf{what} your client wants.
+%With each iteration describe the \textbf{how}.
+%Include user stories attempted, data structures introduced, and any key design
+%decisions.
+
+%Copy this layout for each iteration. ]]
+
+\subsection{Sprint 1}
+
+\subsubsection{Plan}
+User Stories attempted in sprint 1 
+
+Brett Bonner
+\begin{itemize}
+    \item S1: Create User (2 pts)
+    \item S2: Guest Account (1 pt)
+    \item S3: Login (1 pt)
+\end{itemize}
+
+
+Ayoposi Olu
+
+\begin{itemize}
+    \item S4: Logout (1 pt)
+    \item S5: Password (2 pts)
+    \item S6: Update (1 pt)
+\end{itemize}
+
+
+Jonathan Ramos
+
+\begin{itemize}
+    \item S7: Profile Avatar (2 pts)
+    \item S8: Add Friend (2 pts)
+    \item S9: Remove Friend (2 pts)
+    \item S10: Show Friends (1 pt)
+\end{itemize}
+
+\subsubsection{Activities}
+
+This sprint established the foundation of our application. We set up our database (Firebase) to handle user authentication as Firebase provides built in email-password authentication. Additionally, we set up the Storage component of Firebase to allow users to upload a profile picture of their choice. Finally, we set up our Firestore component of Firebase to maintain information for every user. Our Firestore is set us a collection of Users in which every User has their own document. Each document contains, the profile picture URL, email, friends-list, and username for each user. 
+
+After establishing the database and its components, we began working on the application through the planned user stories. All of the user stories attempted during this sprint relied on the functionality of the database, with the exception of S2: Guest Account. S1, S3, and S4, and S5 rely on the authentication component of Firebase. S6. S8. S9, and S10 rely on Firestore as these user stories rely on accessing each player's document. S7 relies on the storage component as persistent storage is needed to store and serve profile pictures to users. 
+
+\subsubsection {Testing}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Testing-2.png}
+    \caption{Sprint 1 Testing Output}
+    \label{fig:enter-label}
+\end{figure}
+
+    We chose Jest as a testing framework. We attempted to do unit testing for branch and statement coverage, however, we struggled with connecting jest with our react components. We managed to get some of our code tested as shown in firebase.js, AddFriend.js, and UserAuth.js. For our next sprint we plan on solving the issue with testing with a spike to ensure we meet the specified requirements. 
+
+
+\subsubsection{Retrospective}
+
+Overall, sprint 1 went well as we completed the user stories we originally planned to complete. Additionally, we completed S10 to display friends which was not originally planned but was completed naturally during development of adding and removing friends. Although we completed our user stories, we did not provide adequate branch and statement coverage when testing. The plan for our next sprint includes a technical task, needed to improve our testing as a whole. 
+
+\begin{table}[h]
+\centering
+No story changes or slices during this sprint.
+
+\caption{Sprint 1 Story Distribution and Point Tracking}
+\begin{tabular}{|p{3cm}|p{6cm}|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Stories Attempted} & \textbf{Points Attempted} & \textbf{Status} \\
+\hline
+Ayoposi Olu & 
+\begin{itemize}
+    \item S4: Logout (1 pt)
+    \item S5: Password (2 pts)
+    \item S6: Update (1 pt)
+\end{itemize} & 
+4 & 
+Completed \\
+\hline
+Jonathan Ramos & 
+\begin{itemize}
+    \item S7: Profile Avatar (2 pts)
+    \item S8: Add Friend (2 pts)
+    \item S9: Remove Friend (2 pts)
+    \item S10: Show Friends (1 pt)
+\end{itemize}& 
+7 & 
+Completed \\
+\hline
+Brett Bonner & 
+\begin{itemize}
+    \item S1: Create User (2 pts)
+    \item S2: Guest Account (1 pt)
+    \item S3: Login (1 pt)
+\end{itemize} & 
+4 & 
+Completed \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Points Attempted}} & \multicolumn{2}{c|}{15} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Sprint Points (All Stories)}} & \multicolumn{2}{c|}{62} \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Sprint 1 period from 10/17/2024 to 10/24/2024}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Team Velocity and Hours-per-Point Metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Hours Worked} & \textbf{Story Points} & \textbf{Hours/Point} \\
+\hline
+Ayoposi Olu & 12 & 4 & 3 \\
+\hline
+Jonathan Ramos & 20 & 7 & 2.85 \\
+\hline
+Brett Bonner & 13 & 4 & 3.25 \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Team Totals}} & \textbf{14} & \textbf{2.857} \\
+\hline
+\end{tabular}
+
+\begin{center}
+\small{Sprint Velocity History}
+\end{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Sprint} & \textbf{Points Completed} & \textbf{Hours Worked} & \textbf{Hours/Point} & \textbf{Velocity} \\
+\hline
+Sprint 1 & 14 & 45 & 3 & 14 pts/sprint \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Velocity = Points completed per sprint \\
+Hours/Point = Total hours worked / Points completed}
+\end{center}
+\end{table}
+
+
+
+
+
+
+\subsection{Sprint 2}
+
+\subsubsection{Plan}
+User Stories and Technical Tasks attempted in sprint 2 
+
+Brett Bonner
+\begin{itemize}
+    \item S15: Private Chat (3 pts)
+    \item S16: Review Chat (2 pts)
+\end{itemize}
+
+
+Ayoposi Olu
+
+\begin{itemize}
+    \item S17: Lobby (5 pts)
+    \item Technical Task: Testing (2 pts)
+\end{itemize}
+
+
+Jonathan Ramos
+
+\begin{itemize}
+    \item S19: Table (5 pts)
+    \item S21: Start Game (3 pts)
+    \item S22: Bot (5 pts)
+\end{itemize}
+
+\subsubsection{Activities}
+During this sprint we built on top of the working deliverable from sprint 1. This sprint began similarly to the last sprint, in which, we set up the database accordingly to handle chats and tables. We added two new collections to our Firestore component, properly names `chats' and `tables'. The chats collection creates a document for every chat that happens between two players. Each chat document has a single field which is an array of maps named messages. Each element in the array is a map containing three fields, senderID, text, and a timestamp. The tables collection creates a document for every table that is created between two players. Each table document has several fields, createdAt, createdBy, maxPlayers, playerIDs (array), players (array), and status. This document is filled appropriately when a player connects to the table. Once the host deals the cards, therefore starting the game, the players array is populated with a deck (array), the currentCard, and the score of each player. This document is essential for the driving the multiplayer game as it is vital that each user obtains the same information from the database in real-time. The tables collection is also necessary to populate our lobby with live tables as user's need to join or create a table to play online. 
+
+
+\subsubsection{Retrospective}
+During this sprint, we planned to complete about the same story points as sprint 1. We improved on our testing coverage when compared to our testing coverage from sprint 1. Due to the challenges we faced with our testing framework and its dependencies, we used AI as a tool to help us clean up our testing environment and write tests based on the test cases we provided. \textbf{S19 Table}, was a challenging story to complete as it involved writing the entire game logic on the front-end and back-end. Additionally, S19 Table required players to connect and play the game in real-time. During the process of completing this user story, user stories \textbf{S21 Start Game} and \textbf{S22 Bot} were also completed. S22 was completed as the game logic was being developed, it was necessary to play with the computer to ensure the game logic was working properly on both the front-end and back-end. S22 Start Game was completed as when 2 players connected to a table, the host of the game needed to deal the cards and therefore start the game for both players. 
+
+\begin{table}[h]
+\centering
+No story changes or slices during this sprint.
+
+\caption{Sprint 2 Story Distribution and Point Tracking}
+\begin{tabular}{|p{3cm}|p{6cm}|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Stories Attempted} & \textbf{Points Attempted} & \textbf{Status} \\
+\hline
+Ayoposi Olu & 
+\begin{itemize}
+    \item S17: Lobby (5 pts)
+    \item Technical Task: Testing (2 pts)
+\end{itemize} & 
+7 & 
+Completed \\
+\hline
+Jonathan Ramos & 
+\begin{itemize}
+    \item S19: Table (5 pts)
+    \item S21: Start Game (3 pts)
+    \item S22: Bot (5 pts)
+\end{itemize}& 
+13 & 
+Completed \\
+\hline
+Brett Bonner & 
+\begin{itemize}
+    \item S15: Private Chat (3 pts)
+    \item S16: Review Chat (2 pts)
+\end{itemize} & 
+5 & 
+Completed \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Points Attempted}} & \multicolumn{2}{c|}{25} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Total Sprint Points (All Stories)}} & \multicolumn{2}{c|}{62} \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Sprint period from 10/24/2024 to 11/07/2024}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Team Velocity and Hours-per-Point Metrics}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Team Member} & \textbf{Hours Worked} & \textbf{Story Points} & \textbf{Hours/Point} \\
+\hline
+Ayoposi Olu & 22 & 7 & 3.14 \\
+\hline
+Jonathan Ramos & 35 & 13 & 2.69 \\
+\hline
+Brett Bonner & 15 & 5 & 3.0 \\
+\hline
+\multicolumn{4}{|c|}{} \\
+\hline
+\multicolumn{2}{|l|}{\textbf{Team Totals }} & \textbf{25} & \textbf{2.88} \\
+\hline
+\end{tabular}
+
+\begin{center}
+\small{Sprint Velocity History}
+\end{center}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Sprint} & \textbf{Points Completed} & \textbf{Hours Worked} & \textbf{Hours/Point} & \textbf{Velocity} \\
+\hline
+Sprint 2 & 25 & 72 & 2.88 & 19.5 pts/sprint \\
+\hline
+\end{tabular}
+
+\vspace{0.5cm}
+\begin{center}
+\small{Velocity = Points completed per sprint \\
+Hours/Point = Total hours worked / Points completed}
+\end{center}
+\end{table}
+

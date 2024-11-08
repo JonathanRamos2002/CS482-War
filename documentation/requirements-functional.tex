@@ -1,0 +1,467 @@
+\section{Requirements}
+
+
+[[
+This section outlines the requirements for the software, primarily via user
+stories. 
+ Non-functional requirements are included separately.
+]]
+
+
+\subsection{User Roles}
+
+%[[ Describe the types of users of your App.
+%What is their technical expertise, what security level access should they have,
+%etc.
+%The purpose of this list is to help you ensure you are meeting the clients
+%needs in your requirements.
+%The names you use here to describe roles should match what you use in your
+%user stories and \emph{reflect the clients vocabulary.}
+
+Our application consists of three types of users, Player, Host, and Admin. 
+
+
+\subsubsection{Player}
+The player should have access to all profile, friend, and chat functionalities.
+Player is also able to join a table and play the round, however, they are not able to deal cards as only the host of the table should be able to start the game by dealing the cards. 
+
+\subsubsection{Host}
+The Host should have access to all functionalities of a Player. However, a host creates new tables for other Players to join. Additionally, the host is also able to start the game by dealing the cards once another Player connects to the Host's table. 
+
+\subsubsection{Admin}
+The Admin should have access to all user's information. An admin can modify user information as needed, they should be able to reset a user's password, or update their username. An admin should also be able to completely remove and create accounts as needed. 
+
+
+\subsection{Functional Requirement User Stories and Tasks}
+
+[[
+This section lists all your user stories, \emph{organized} by user type and for each user type organized by FIX ME
+[explain here the organization scheme you chose -- by priority? By points? By something else? ].
+]]
+
+For each user type create a subsubsection of the same format entitled using the
+user type. ]]
+
+
+\subsubsection{Player}
+
+[[ Complete the following for each user story.
+Put a blank line between user stories]]
+
+\textbf{S1: Create User (2)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to create an account
+    \item \textbf{So that} I can play the game
+    \item \textbf{Definition of Done:} When I am able to create a new account
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S2: Guest Account (1)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to play as a guest
+    \item \textbf{So that} I can play without registering
+    \item \textbf{Definition of Done:} When I am able to play without registering
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S3: Login (1)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to log in to my account
+    \item \textbf{So that} I can play access my saved data
+    \item \textbf{Definition of Done:} When I am able to access my previously created account
+    \item \textbf{Depends On:} S2: Create Account
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S4: Logout (1)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to log out of my account
+    \item \textbf{So that} only I have access to my account
+    \item \textbf{Definition of Done:} When I am able to control access to my account
+    \item \textbf{Depends On:} S3: Login
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S5: Password (2)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to change my password
+    \item \textbf{So that} I can secure my account
+    \item \textbf{Definition of Done:} When I am able to secure my account
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S6: Update (1)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to update personal information
+    \item \textbf{So that} I have an accurate profile
+    \item \textbf{Definition of Done:} When I am able to update my account
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S7: Profile Avatar (2)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to add a profile picture
+    \item \textbf{So that} I can show off my creativity
+    \item \textbf{Definition of Done:} When I am able to choose a profile picture
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S8: Add Friend (2)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to add another player as a friend
+    \item \textbf{So that} I can easily connect with friends
+    \item \textbf{Definition of Done:} When I am able to add another player to my list of friends
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S9: Remove Friend (2)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to remove another player as a friend
+    \item \textbf{So that} I can shorten my friends list
+    \item \textbf{Definition of Done:} When I am able to remove another player from my list of friends
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S10: Show Friends (1)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to see my list of friends
+    \item \textbf{So that} I know who my friends are
+    \item \textbf{Definition of Done:} When I am able to see all the players in my friends list
+    \item \textbf{Depends On:} S8: Add Friend 
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S11: Invite Friend (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to invite a friend to my table
+    \item \textbf{So that} I can play at the same table as my friend
+    \item \textbf{Definition of Done:} When I am able to invite another player to my table
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S12: Display Stats (1)}
+\begin{enumerate}
+    \item Priority: Low
+    \item \textbf{I want} to show off my stats (W/L)
+    \item \textbf{So that} I can compare with my friends
+    \item \textbf{Definition of Done:} When I can compare stats
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S13: Report Player (2)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to report another player for violations
+    \item \textbf{So that} I can ensure players are following rules/guidelines
+    \item \textbf{Definition of Done:} When I am able to report a player
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S14: Public Chat (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to send messages to the entire table
+    \item \textbf{So that} I can communicate publicly
+    \item \textbf{Definition of Done:} I can communicate with the table
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S15: Private Chat (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to send messages to my friends
+    \item \textbf{So that} I can communicate outside of table-chat (public chat)
+    \item \textbf{Definition of Done:} I can communicate privately
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S16: Review Chat (2)}
+\begin{enumerate}
+    \item Priority: Low
+    \item \textbf{I want} to view previous messages
+    \item \textbf{So that} I can review my conversations
+    \item \textbf{Definition of Done:} Private chats are saved
+    \item \textbf{Depends On:} S15: Private Chat
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S17: Lobby (5)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to access the lobby 
+    \item \textbf{So that} I can see live tables, see open/closed tables, sort by amount of tables
+    \item \textbf{Definition of Done:} I am able to access the lobby correctly
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S18: Tutorial (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} the ability to do the tutorial 
+    \item \textbf{So that} I can learn to play the game
+    \item \textbf{Definition of Done:} Players understand the game
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S19: Table (5)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to start my own table 
+    \item \textbf{So that} I can play with friends or random people
+    \item \textbf{Definition of Done:} My friends or random people can join my table
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S20: Currency (1)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to raise the stakes of my table
+    \item \textbf{So that} I can make more "fake" currency
+    \item \textbf{Definition of Done:} I can set the currency for my table
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S22: Bot (5)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to play with a bot
+    \item \textbf{So that} I can play without friends
+    \item \textbf{Definition of Done:} When a bot plays the game with the player
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+
+\subsubsection{Host}
+
+[[ Complete the following for each user story.
+Put a blank line between user stories]]
+
+\textbf{S21: Start Game (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to start the game
+    \item \textbf{So that} I can play the game
+    \item \textbf{Definition of Done:} When I am able to successfully start the game
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\subsubsection{Admin}
+
+[[ Complete the following for each user story.
+Put a blank line between user stories]]
+
+\textbf{S23: Manage Users (1)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to view a list of all registered users
+    \item \textbf{So that} I can monitor and manage all users
+    \item \textbf{Definition of Done:} When I can display all registered users in the system
+    \item \textbf{Depends On:} S1: Create User
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S24: Manage Tables (3)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to monitor games in real-time
+    \item \textbf{So that} I can ensure proper gameplay
+    \item \textbf{Definition of Done:} When I can interact with tables in real-time
+    \item \textbf{Depends On:} S19: Table
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S25: Manage Ads (3)}
+\begin{enumerate}
+    \item Priority: High
+    \item \textbf{I want} to create and manage ads
+    \item \textbf{So that} I can make money and promote my company
+    \item \textbf{Definition of Done:} When I can add and delete different ads on the website
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S26: Analytics (1)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to track player data
+    \item \textbf{So that} I can analyze the app's growth
+    \item \textbf{Definition of Done:} When I can view information on the app's performance
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+\textbf{S27: Notifications (1)}
+\begin{enumerate}
+    \item Priority: Medium
+    \item \textbf{I want} to send messages to all players
+    \item \textbf{So that} I can send important announcements like maintenance or events
+    \item \textbf{Definition of Done:} When I can communicate important announcements
+    \item \textbf{Depends On:} N/A
+    \item Tasks: N/A
+    %\begin{enumerate}
+    % For each task write the ID, :, then title. Then describe the task.
+        %\item Task [[ ID: Title. Description.]]
+    %\end{enumerate}
+\end{enumerate}
+
+
+
