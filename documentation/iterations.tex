@@ -184,8 +184,19 @@ Jonathan Ramos
 During this sprint we built on top of the working deliverable from sprint 1. This sprint began similarly to the last sprint, in which, we set up the database accordingly to handle chats and tables. We added two new collections to our Firestore component, properly names `chats' and `tables'. The chats collection creates a document for every chat that happens between two players. Each chat document has a single field which is an array of maps named messages. Each element in the array is a map containing three fields, senderID, text, and a timestamp. The tables collection creates a document for every table that is created between two players. Each table document has several fields, createdAt, createdBy, maxPlayers, playerIDs (array), players (array), and status. This document is filled appropriately when a player connects to the table. Once the host deals the cards, therefore starting the game, the players array is populated with a deck (array), the currentCard, and the score of each player. This document is essential for the driving the multiplayer game as it is vital that each user obtains the same information from the database in real-time. The tables collection is also necessary to populate our lobby with live tables as user's need to join or create a table to play online. 
 
 
+\subsubsection {Testing}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\linewidth]{figures/Testing.png}
+    \caption{Sprint 2 Testing Output}
+    \label{fig:enter-label}
+\end{figure}
+
+We improved on our testing coverage when compared to our testing coverage from sprint 1. Due to the challenges we faced with our testing framework and its dependencies, we used AI as a tool to help us clean up our testing environment and write tests based on the test cases we provided. We increased our statement coverage for all files to 77.23 percent and increased out branch coverage for all files to 72.67 percent. This is a significant increase when compared to our testing from sprint 1. 
+     
+
 \subsubsection{Retrospective}
-During this sprint, we planned to complete about the same story points as sprint 1. We improved on our testing coverage when compared to our testing coverage from sprint 1. Due to the challenges we faced with our testing framework and its dependencies, we used AI as a tool to help us clean up our testing environment and write tests based on the test cases we provided. \textbf{S19 Table}, was a challenging story to complete as it involved writing the entire game logic on the front-end and back-end. Additionally, S19 Table required players to connect and play the game in real-time. During the process of completing this user story, user stories \textbf{S21 Start Game} and \textbf{S22 Bot} were also completed. S22 was completed as the game logic was being developed, it was necessary to play with the computer to ensure the game logic was working properly on both the front-end and back-end. S22 Start Game was completed as when 2 players connected to a table, the host of the game needed to deal the cards and therefore start the game for both players. 
+During this sprint, we planned to complete about the same story points as sprint 1. \textbf{S19 Table}, was a challenging story to complete as it involved writing the entire game logic on the front-end and back-end. Additionally, S19 Table required players to connect and play the game in real-time. During the process of completing this user story, user stories \textbf{S21 Start Game} and \textbf{S22 Bot} were also completed. S22 was completed as the game logic was being developed, it was necessary to play with the computer to ensure the game logic was working properly on both the front-end and back-end. S22 Start Game was completed as when 2 players connected to a table, the host of the game needed to deal the cards and therefore start the game for both players. 
 
 \begin{table}[h]
 \centering
