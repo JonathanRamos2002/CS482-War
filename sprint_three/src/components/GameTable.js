@@ -241,13 +241,17 @@ function GameTable({user, isGuest, guestUsername}) {
 
                         {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
                         { (!playerDeck && !botDeck) && (
-                            <button onClick={dealCards}>
-                                <img
-                                    src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                                    alt="Backside of the entire Deck"
-                                    className="full-deck"
-                                />
-                            </button>
+                            <div className="full-deck-container">
+                                <button onClick={dealCards}>
+                                    <img
+                                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                        alt="Backside of the entire Deck"
+                                        className="full-deck"
+                                    />
+                                </button>
+                                <div className="full-deck-swap1"></div> {/* First animated card */}
+                                <div className="full-deck-swap2"></div> {/* Second animated card */}
+                            </div>
                         )}
                     </div>
                 </div>
