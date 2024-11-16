@@ -46,6 +46,9 @@ function GameTable({user, isGuest, guestUsername}) {
      const [botCard, setBotCard] = useState(null);
      const [gameMessage, setGameMessage] = useState("Click 'Deal Cards' to start the game.");
 
+     // War state
+    const [isWar, setIsWar] = useState(false); // Track whether it's a war
+
      // Card positions
     const [cardPosition, setCardPosition] = useState({ x: 0, y: 290 });
     const [isDragging, setIsDragging] = useState(false);
@@ -78,8 +81,12 @@ function GameTable({user, isGuest, guestUsername}) {
             );
 
             if (isInDropZone) {
-                setCardPosition({ x: 0, y: 300 });
-                playRound()
+                if (isWar) {
+                    playRound()
+                } else {
+                    setCardPosition({ x: 0, y: 300 });
+                    playRound()
+                }
             }
         }
     };
@@ -155,45 +162,71 @@ function GameTable({user, isGuest, guestUsername}) {
          setGameMessage("Game started! Click to play a round.");
     };
  
-     // Play a single round
-     const playRound = () => {
-        if (!playerDeck || !botDeck) {
-            setGameMessage("Game has not started!");
+    // Play a single round
+    const playRound = () => {
+        if (!playerDeck || !botDeck || playerDeck.length === 0 || botDeck.length === 0) {
+            setGameMessage(playerDeck.length > 0 ? "You win the game!" : "Bot wins the game!");
             return;
         }
-
-        if (playerDeck.length === 0 || botDeck.length === 0) {
-            setGameMessage(playerDeck.length > 0 ? "You win the game! Bot ran out of cards :) " : "Bot wins the game! You ran out of cards :(");
-            return;
+    
+        if (isWar) {
+            // War scenario: both players draw three cards face down and one face up
+            const playerWarCards = playerDeck.splice(0, Math.min(4, playerDeck.length));
+            const botWarCards = botDeck.splice(0, Math.min(4, botDeck.length));
+    
+            if (playerWarCards.length < 4 || botWarCards.length < 4) {
+                setGameMessage(playerDeck.length > botDeck.length ? "You win the game!" : "Bot wins the game!");
+                return;
+            }
+    
+            const playerWarCard = playerWarCards.pop();
+            const botWarCard = botWarCards.pop();
+            
+            playerWarCards.push(playerCard); // add playerCard to playerWarCards
+            botWarCards.push(botCard); // add botCard to botWarCards
+    
+            setPlayerCard(playerWarCard);
+            setBotCard(botWarCard);
+    
+            const playerValue = CARD_VALUE_MAP[playerWarCard.value];
+            const botValue = CARD_VALUE_MAP[botWarCard.value];
+    
+            if (playerValue > botValue) {
+                setPlayerDeck((prev) => [...prev, ...playerWarCards, ...botWarCards, playerWarCard, botWarCard]);
+                setGameMessage("You win the war!");
+                setIsWar(false);
+            } else if (playerValue < botValue) {
+                setBotDeck((prev) => [...prev, ...botWarCards, ...playerWarCards, botWarCard, playerWarCard]);
+                setGameMessage("Bot wins the war!");
+                setIsWar(false);
+            } else {
+                setGameMessage("Another tie! Continue the war!");
+            }
+            setFlip(!flip);
+        } else {
+            // Regular round logic
+            const playerCardDrawn = playerDeck.shift();
+            const botCardDrawn = botDeck.shift();
+            setPlayerCard(playerCardDrawn);
+            setBotCard(botCardDrawn);
+    
+            const playerValue = CARD_VALUE_MAP[playerCardDrawn.value];
+            const botValue = CARD_VALUE_MAP[botCardDrawn.value];
+    
+            if (playerValue > botValue) {
+                setPlayerDeck((prev) => [...prev, playerCardDrawn, botCardDrawn]);
+                setGameMessage("You win this round!");
+            } else if (playerValue < botValue) {
+                setBotDeck((prev) => [...prev, botCardDrawn, playerCardDrawn]);
+                setGameMessage("Bot wins this round!");
+            } else {
+                setIsWar(true);
+                setGameMessage("It's a tie! War begins!");
+            }
+            setFlip(!flip);
         }
- 
-        // Each player will draw a card, then set each player's current card to the one drawn 
-        const playerCardDrawn = playerDeck.shift();
-        const botCardDrawn = botDeck.shift();
-        setPlayerCard(playerCardDrawn);
-        setBotCard(botCardDrawn);
- 
-        // Determine the integer value of the card using the CARD_VALUE_MAP
-        const playerCardValue = CARD_VALUE_MAP[playerCardDrawn.value];
-        const botCardValue = CARD_VALUE_MAP[botCardDrawn.value];
- 
-        let roundMessage = "";
-        if (playerCardValue > botCardValue) {
-            setPlayerDeck((prevDeck) => [...prevDeck, playerCardDrawn, botCardDrawn]);
-            roundMessage = "You win this round!";
-         } else if (playerCardValue < botCardValue) {
-            setBotDeck((prevDeck) => [...prevDeck, botCardDrawn, playerCardDrawn]);
-            roundMessage = "Bot wins this round!";
-         } else {
-            roundMessage = "It's a tie! War!";
-            //CURRENTLY JUST RETURNING CARDS BACK TO EACH PLAYER
-            setPlayerDeck((prevDeck) => [...prevDeck, playerCardDrawn]);
-            setBotDeck((prevDeck) => [...prevDeck, botCardDrawn]);
-         }
-
-        setFlip(!flip);
-        setGameMessage(roundMessage);
-    }; 
+    };
+    
     
     return (
         <div className='game-container' onMouseMove={handleDrag} onMouseUp={handleMouseUpContainer}>
