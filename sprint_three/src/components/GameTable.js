@@ -83,6 +83,7 @@ function GameTable({user, isGuest, guestUsername}) {
             if (isInDropZone) {
                 if (isWar) {
                     playRound()
+                    setCardPosition({ x: 0, y: 300 });
                 } else {
                     setCardPosition({ x: 0, y: 300 });
                     playRound()
@@ -256,6 +257,19 @@ function GameTable({user, isGuest, guestUsername}) {
                                 alt="Bot's Card"
                                 className='bot-card'
                             />
+
+                            {isWar && (
+                                <div className="war-cards">
+                                    {[...Array(3)].map((_, index) => (
+                                        <img
+                                            key={index}
+                                            src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                            alt={`War facedown card ${index + 1}`}
+                                            className={`facedown-card facedown-card-${index + 1}`}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
                     )}
 
@@ -269,8 +283,22 @@ function GameTable({user, isGuest, guestUsername}) {
                                     alt="Player's Card"
                                     className='player-card'
                                 />
+
+                                {isWar && (
+                                    <div className="war-cards">
+                                        {[...Array(3)].map((_, index) => (
+                                            <img
+                                                key={index}
+                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                                alt={`War facedown card ${index + 1}`}
+                                                className={`facedown-card facedown-card-${index + 1}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         )}
+                
 
                         {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
                         { (!playerDeck && !botDeck) && (
