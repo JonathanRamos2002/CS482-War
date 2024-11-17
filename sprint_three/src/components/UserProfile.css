@@ -55,3 +55,20 @@
 .logout-button:hover {
     background-color: #3a6fbf;
 }
+
+.logout-confirmation {
+    background-color: transparent;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+}
+
+.confirm-logout-button, .cancel-logout-button {
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin: 5px; /* Add spacing between buttons */
+}
