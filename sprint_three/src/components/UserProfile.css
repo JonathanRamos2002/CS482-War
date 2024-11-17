@@ -41,3 +41,17 @@
 .edit-profile-button:hover {
     background-color: #3a6fbf;
 }
+
+.logout-button{
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.logout-button:hover {
+    background-color: #3a6fbf;
+}
