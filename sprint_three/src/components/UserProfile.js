@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import {storage} from '../firebase';
-import {ref, getDownloadURL} from 'firebase/storage';
-import {getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
-import './UserProfile.css'; 
+import { storage } from '../firebase';
+import { ref, getDownloadURL } from 'firebase/storage';
+import { getFirestore, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import './UserProfile.css';
 
-function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout}) {
+function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout }) {
   const [imageFetched, setImageFetched] = useState(false);
   const [isConfirming, setIsConfirming] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [showStats, setShowStats] = useState(false); // State to control stats display
+  const [wins, setWins] = useState(0); // State to store wins
+  const [losses, setLosses] = useState(0); // State to store losses
   const [newUsername, setNewUsername] = useState(user.email || '');
   const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
 
   const fetchProfileImage = async () => {
-    if(!imageFetched) { 
+    if (!imageFetched) {
       const storageRef = ref(storage, `avatars/${user.uid}`);
       try {
         const url = await getDownloadURL(storageRef);
@@ -29,70 +32,76 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
 
   const [username, setUsername] = useState(user.email || '');
 
-  /**
-   * Summary: Obtains the username of the account logged in
-   * Purpose: Sets the username usestate to the username found in the firestore
-   */
   const getUsername = async () => {
     try {
       const userRef = doc(db, 'users', user.uid);
       const userSnapshot = await getDoc(userRef);
-  
-      if(userSnapshot.exists()) {
+
+      if (userSnapshot.exists()) {
         const userData = userSnapshot.data();
         const myUsername = userData.username;
         setUsername(myUsername);
       }
-    } catch (error){
+    } catch (error) {
       console.error(error);
     }
   };
 
   getUsername();
 
-  /**
- * Updates user profile information in Firestore and local state
- * @param {React.FormEvent} e 
- * @returns {Promise<void>}
- * @throws {FirebaseError} When database update fails
- * @example
- * handleProfileUpdate(event) 
- */
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-
     try {
       const userRef = doc(db, 'users', user.uid);
-      
-      await updateDoc(userRef, { // Updated the document in Firestore
+      await updateDoc(userRef, {
         username: newUsername,
-        email: newEmail
+        email: newEmail,
       });
-
-      setUser((prevUser) => ({  // Updated local state
+      setUser((prevUser) => ({
         ...prevUser,
         username: newUsername,
         email: newEmail,
       }));
-
       setIsEditing(false);
     } catch (error) {
       console.error('error updating profile:', error);
     }
   };
-  /**
- * Resets form fields to original values 
- * @returns {void}
- * @example
- * handleCancelEdit() 
- */
+
   const handleCancelEdit = () => {
     setNewUsername(user.username || '');
     setNewEmail(user.email || '');
     setIsEditing(false);
   };
-  // onLogout functionality is handled in App.js
-  // The function is received from App.js to UserProfile.js
+
+  // Fetch stats from Firebase or create default if not present
+  const getUserStats = async () => {
+    try {
+      const userRef = doc(db, 'users', user.uid);
+      const userSnapshot = await getDoc(userRef);
+
+      if (userSnapshot.exists()) {
+        const userData = userSnapshot.data();
+        setWins(userData.wins || 0);
+        setLosses(userData.losses || 0);
+      } else {
+        // If no document exists, create it with default values
+        await setDoc(userRef, { wins: 0, losses: 0 }, { merge: true });
+        setWins(0);
+        setLosses(0);
+        console.log("New stats document created for user.");
+      }
+    } catch (error) {
+      console.error("Error fetching or creating user stats:", error);
+    }
+  };
+
+  const toggleStats = () => {
+    if (!showStats) {
+      getUserStats(); // Fetch stats only when displaying for the first time
+    }
+    setShowStats(!showStats); // Toggle stats visibility
+  };
 
   return (
     <div className="profile-container">
@@ -102,15 +111,22 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
 
       <h1>Welcome, {username} !</h1>
 
-      {/* TODO : Ayo update profile functionality */}
       <div className="profile-update-section">
         {!isEditing ? (
-          <button 
-            className="edit-profile-button"
-            onClick={() => setIsEditing(true)}
-          >
-            Update Profile
-          </button>
+          <>
+            <button 
+              className="edit-profile-button"
+              onClick={() => setIsEditing(true)}
+            >
+              Update Profile
+            </button>
+            <button
+              className="display-stats-button" // New stats button
+              onClick={toggleStats}
+            >
+              {showStats ? 'Hide Stats' : 'Display Stats'}
+            </button>
+          </>
         ) : (
           <div className="edit-profile-form">
             <h2>Update Your Profile</h2>
@@ -152,7 +168,14 @@ function UserProfile({user, setUser, selectedImage, setSelectedImage, onLogout})
         )}
       </div>
 
-      {/* TODO : Ayo logout functionality */}
+      {showStats && ( // Conditionally render stats section
+        <div className="stats-section">
+          <h3>Your Stats</h3>
+          <p>Wins: {wins}</p>
+          <p>Losses: {losses}</p>
+        </div>
+      )}
+
       {isConfirming ? (
         <div className="logout-confirmation">
           <p>Are you sure you want to log out?</p>

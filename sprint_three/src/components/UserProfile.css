@@ -72,3 +72,21 @@
     border-radius: 4px;
     margin: 5px; /* Add spacing between buttons */
 }
+
+.display-stats-button {
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.stats-section {
+    background-color: transparent;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: center;
+}

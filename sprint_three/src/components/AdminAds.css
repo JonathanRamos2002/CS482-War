@@ -1,0 +1,35 @@
+.admin-ads-panel {
+    padding: 20px;
+    background: #1d1d1d;
+    color: white;
+  }
+  
+  .ad-inputs input {
+    margin: 10px;
+    padding: 8px;
+    width: 300px;
+  }
+  
+  .ad-inputs button {
+    padding: 8px 12px;
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .ad-item {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .ad-item img {
+    width: 100px;
+    height: auto;
+  }
+  
+  .active-ads {
+    margin-top: 20px;
+  }
+  
