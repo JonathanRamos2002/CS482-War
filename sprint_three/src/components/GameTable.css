@@ -7,30 +7,23 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    position: absolute;
+    align-items: center;
+    margin: 0 auto; /* Center using margin rather than translate */
+    position: relative; /* Position relative so children can use absolute within it */
     top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateY(-50%); /* Only center vertically */
+    perspective: 1000px; /* Adds a 3D perspective */
 }
 
 .game-board {
-    /* border: 2px solid #333; remove to help visualize container */
     min-height: 400px;
-    /* background-color: rgba(0, 0, 0, 0.7); remove to help visualize container */
-    display: flex; /* Use flex display */
-    flex-direction: column; /* Stack children vertically */
-    justify-content: space-between; /* Space out items */
-    align-items: center; /* Center items horizontally */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
     position: relative;
 }
 
-.drawn-cards-container {
-    display: flex; /* Use flexbox for middle components */
-    justify-content: space-between; /* Adds space between bot-card and player-card */
-    align-items: center; /* Centers the cards vertically */
-    width: 20%; /* Adjust the width to control spacing */
-    margin: 0 auto; /* Centers the container within the parent */
-}
 
 .card-backside {
     position: absolute;
@@ -41,20 +34,8 @@
     height: auto;
 }
 
-.card-wrapper {
-    display: flex;
-    flex-direction: column; /* Stack label and card vertically */
-    align-items: center;
-    text-align: center;
-}
 
-.card-label {
-    font-size: 0.9em;
-    color: #b9d6ff; /* Adjust label color */
-    margin-bottom: 5px; /* Space between label and card */
-}
-
-.bot-deck, .player-deck, .bot-card, .player-card {
+.bot-deck, .player-deck, .bot-card, .player-card, .player-deck-drag {
     width: 80px;
     height: auto;
 }
@@ -64,7 +45,34 @@
 }
 
 .player-deck {
-    bottom: 10px;
+    bottom: 10px; /* Initial positioning */
+}
+
+.player-deck-drag {
+    position: absolute; /* Keep it absolutely positioned within game-container */
+    bottom: 10px; /* Initial positioning */
+    cursor: grab;
+    z-index: 1;
+    opacity: 0; /* Initially hidden */
+    transform: scale(0.8); /* Start smaller for the pop effect */
+    animation: popIn 0.5s ease-out forwards;
+    animation-delay: 1s; /* Adjust if waiting for other animations */
+}
+
+/* Keyframes for pop effect */
+@keyframes popIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8); /* Start at a smaller scale */
+    }
+    60% {
+        opacity: 1;
+        transform: scale(1.1); /* Scale up slightly larger than normal for the "pop" */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1); /* Settle at normal size */
+    }
 }
 
 .players-info {
@@ -81,7 +89,8 @@
 }
 
 
-.deal-cards-button {
+.deal-cards-button,
+.lobby-button {
     display: flex;
     align-items: flex-end; 
     background-color: #4f83ff;
@@ -94,13 +103,9 @@
     transition: background-color 0.3s;
 }
 
-.deal-cards-button:hover {
+.deal-cards-button:hover,
+.lobby-button:hover {
     background-color: #3a6fbf;
-}
-
-.play-round-button {
-    display: flex;
-    align-items: flex-end;
 }
 
 .username {
@@ -115,21 +120,222 @@
     object-fit: cover;
 }
 
-.lobby-button {
-    display: flex;
-    align-items: flex-start; 
-    background-color: #4f83ff;
-    color: white;
-    font-size: 1em;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 8px;
-    margin-left: 10px;
-    margin-bottom: 3px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+
+.drop-zone {
+    width: 90px;
+    height: 115px;
+    position: absolute;
+    top: 50%; /* Position it in the center */
+    left: 125%;
+    transform: translate(-50%, -50%);
+    border: 2px dashed #ccc; /* Optional: add a dashed border for visibility */
+    z-index: 0;
 }
 
-.lobby-button:hover {
-    background-color: #3a6fbf;
+.bot-zone {
+    width: 90px;
+    height: 115px;
+    position: absolute;
+    top: 50%; /* Position it in the center */
+    right: 20%;
+    transform: translate(-50%, -50%);
+}
+
+.card-wrapper-bot {
+    position: relative;
+    z-index: 1;
+}
+
+.card-wrapper-player {
+    position: relative;
+    z-index: 1; /* Ensure the cards are above the drop-zone */
+}
+
+.bot-card,
+.player-card {
+    width: 80px; /* Adjust size as per your requirement */
+    height: auto; /* Adjust size as per your requirement */
+    transition: transform 0.6s; /* Smooth transition on flip */
+    transform-style: preserve-3d; /* Ensures the flip happens in 3D space */
+    backface-visibility: hidden; /* Hides the back of the card when flipped */
+    animation: flipIn 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards;  /* Flip animation */
+}
+
+/* The flip animation keyframes */
+@keyframes flipIn {
+    0% {
+        transform: rotateY(90deg) scale(0.9); /* Start at the right (90deg), slightly scaled down */
+        opacity: 0;
+    }
+    50% {
+        transform: rotateY(0deg) scale(1.05); /* Flip to the front and scale slightly */
+        opacity: 1;
+    }
+    100% {
+        transform: rotateY(0deg) scale(1); /* End at normal scale */
+    }
+}
+
+.bot-deck, .player-deck {
+    width: 80px; /* Adjust size as per your requirement */
+    height: auto; /* Adjust size as per your requirement */
+    opacity: 0; /* Start hidden */
+    transform: scale(0.7); /* Start smaller */
+    animation: scaleInBounce 1s cubic-bezier(0.68, -0.55, 0.27, 1.55) forwards; /* Bounce effect */
+}
+
+@keyframes scaleInBounce {
+    0% {
+        opacity: 0;
+        transform: scale(0.7); /* Start smaller */
+    }
+    50% {
+        transform: scale(1.1); /* Slightly scale up past the original size for bounce */
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1); /* End at normal size */
+    }
+}
+
+.card-label {
+    position: absolute;
+    bottom: 115px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+/* Main deck image container */
+.full-deck-container {
+    position: relative;
+    width: 80px; /* Adjust as needed */
+    height: auto;
+}
+
+.full-deck {
+    width: 80px;
+    height: auto;
+    transition: transform 0.3s ease;
+}
+
+/* Extra cards that will animate */
+.full-deck-swap1, .full-deck-swap2 {
+    position: absolute;
+    width: 80px;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: url("../../public/images/Cards/cardBack_blue5.png");
+    background-size: cover;
+    background-position: center;
+    pointer-events: none; /* Prevent interference with hover */
+    transform: translate(0, 0) scale(1); /* Default state */
+}
+
+/* Hover trigger for animations */
+.full-deck-container:hover .full-deck-swap1 {
+    animation: swap1 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+.full-deck-container:hover .full-deck-swap2 {
+    animation: swap2 2s cubic-bezier(0.25, 1, 0.5, 1) infinite;
+}
+
+/* Keyframes for a smoother shuffle animation */
+@keyframes swap1 {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    10% {
+        transform: translate(-10px, -5px) rotate(-5deg) scale(0.98);
+    }
+    25% {
+        transform: translate(-25px, -15px) rotate(-10deg) scale(0.95);
+    }
+    50% {
+        transform: translate(0px, 5px) rotate(5deg) scale(0.98);
+    }
+    75% {
+        transform: translate(15px, -10px) rotate(10deg) scale(0.97);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+}
+
+@keyframes swap2 {
+    0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+    10% {
+        transform: translate(10px, 5px) rotate(5deg) scale(0.98);
+    }
+    25% {
+        transform: translate(25px, 15px) rotate(10deg) scale(0.95);
+    }
+    50% {
+        transform: translate(0px, -5px) rotate(-5deg) scale(0.98);
+    }
+    75% {
+        transform: translate(-15px, 10px) rotate(-10deg) scale(0.97);
+    }
+    100% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+    }
+}
+
+
+.war-cards {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px; /* Adjust for spacing between cards */
+    animation: dealCards 1s ease-out forwards;
+}
+
+/* Style for individual facedown cards */
+.facedown-card {
+    width: 80px; 
+    height: auto;
+    position: absolute;
+    opacity: 0; 
+    transform: scale(0.8);
+    animation: fadeInAndStack 1s ease-out forwards;
+}
+
+/* Positioning for staggered effect */
+.facedown-card-1 {
+    top: -100px;
+    left: 20px;
+    animation-delay: 0.1s;
+}
+.facedown-card-2 {
+    top: -100px;
+    left: 30px;
+    animation-delay: 0.2s;
+}
+.facedown-card-3 {
+    top: -100px;
+    left: 40px;
+    animation-delay: 0.3s;
+}
+
+/* Animation for cards appearing and stacking */
+@keyframes fadeInAndStack {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1); 
+    }
 }
