@@ -130,25 +130,26 @@
     transform: translate(-50%, -50%);
     border: 2px dashed #ccc; /* Optional: add a dashed border for visibility */
     z-index: 0;
-    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
-.drop-zone.war-active {
-    border-color: red;
-    box-shadow: 0 0 15px red;
+.bot-zone {
+    width: 90px;
+    height: 115px;
+    position: absolute;
+    top: 50%; /* Position it in the center */
+    right: 20%;
+    transform: translate(-50%, -50%);
+}
+
+.card-wrapper-bot {
+    position: relative;
+    z-index: 1;
 }
 
 .card-wrapper-player {
     position: relative;
     z-index: 1; /* Ensure the cards are above the drop-zone */
 }
-
-.card-wrapper-bot {
-    right: 600%;
-    position: relative;
-    z-index: 0; /* Ensure the cards are above the drop-zone */
-}
-
 
 .bot-card,
 .player-card {

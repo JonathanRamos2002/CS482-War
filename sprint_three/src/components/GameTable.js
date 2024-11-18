@@ -84,9 +84,9 @@ function GameTable({user, isGuest, guestUsername}) {
             if (isInDropZone) {
                 if (isWar) {
                     playRound()
-                    setCardPosition({ x: 0, y: 300 });
+                    setCardPosition({ x: 0, y: 290 });
                 } else {
-                    setCardPosition({ x: 0, y: 300 });
+                    setCardPosition({ x: 0, y: 290 });
                     playRound()
                 }
             }
@@ -190,8 +190,8 @@ function GameTable({user, isGuest, guestUsername}) {
             setPlayerCard(playerWarCard);
             setBotCard(botWarCard);
     
-            const playerValue = CARD_VALUE_MAP[playerWarCard.value];
-            const botValue = CARD_VALUE_MAP[botWarCard.value];
+            const playerValue = playerWarCard ? CARD_VALUE_MAP[playerWarCard.value] : CARD_VALUE_MAP[playerCard.value];
+            const botValue = botWarCard ? CARD_VALUE_MAP[botWarCard.value] : CARD_VALUE_MAP[botCard.value];
     
             if (playerValue > botValue) {
                 if (oldWar) {
@@ -219,8 +219,8 @@ function GameTable({user, isGuest, guestUsername}) {
             setPlayerCard(playerCardDrawn);
             setBotCard(botCardDrawn);
     
-            const playerValue = CARD_VALUE_MAP[playerCardDrawn.value];
-            const botValue = CARD_VALUE_MAP[botCardDrawn.value];
+            const playerValue = playerCardDrawn ? CARD_VALUE_MAP[playerCardDrawn.value] : CARD_VALUE_MAP[playerCard.value];
+            const botValue = botCardDrawn ? CARD_VALUE_MAP[botCardDrawn.value] : CARD_VALUE_MAP[botCard.value];
     
             if (playerValue > botValue) {
                 setPlayerDeck((prev) => [...prev, playerCardDrawn, botCardDrawn]);
@@ -257,30 +257,32 @@ function GameTable({user, isGuest, guestUsername}) {
 
                 {/* Show the chosen cards */}
                 <div className='drawn-cards-container'>
-                    { ((botDeck && botDeck.length > 0) && (playerDeck && playerDeck.length > 0)) && botCard && (
-                        <div className="card-wrapper-bot">
-                            <span className="card-label">Bot</span>
-                            <img
-                                key={flip}
-                                src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[botCard.suit]}${botCard.value}.png`}
-                                alt="Bot's Card"
-                                className='bot-card'
-                            />
+                    <div className='bot-zone'>
+                        { ((botDeck && botDeck.length > 0) && (playerDeck && playerDeck.length > 0)) && botCard && (
+                            <div className="card-wrapper-bot">
+                                <span className="card-label">Bot</span>
+                                <img
+                                    key={flip}
+                                    src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[botCard.suit]}${botCard.value}.png`}
+                                    alt="Bot's Card"
+                                    className='bot-card'
+                                />
 
-                            {isWar && (
-                                <div className="war-cards">
-                                    {[...Array(3)].map((_, index) => (
-                                        <img
-                                            key={index}
-                                            src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                                            alt={`War facedown card ${index + 1}`}
-                                            className={`facedown-card facedown-card-${index + 1}`}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                                {isWar && (
+                                    <div className="war-cards">
+                                        {[...Array(3)].map((_, index) => (
+                                            <img
+                                                key={index}
+                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                                alt={`War facedown card ${index + 1}`}
+                                                className={`facedown-card facedown-card-${index + 1}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <div className='drop-zone'>
                         { ((playerDeck && playerDeck.length > 0) && (botDeck && botDeck.length > 0)) && playerCard && (
