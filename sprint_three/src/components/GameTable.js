@@ -48,6 +48,7 @@ function GameTable({user, isGuest, guestUsername}) {
 
      // War state
     const [isWar, setIsWar] = useState(false); // Track whether it's a war
+    const [oldWar, setOldWar] = useState(null); // Track previous war pile 
 
      // Card positions
     const [cardPosition, setCardPosition] = useState({ x: 0, y: 290 });
@@ -193,15 +194,22 @@ function GameTable({user, isGuest, guestUsername}) {
             const botValue = CARD_VALUE_MAP[botWarCard.value];
     
             if (playerValue > botValue) {
+                if (oldWar) {
+                    setPlayerDeck((prev) => [...prev, ...oldWar]);
+                } 
                 setPlayerDeck((prev) => [...prev, ...playerWarCards, ...botWarCards, playerWarCard, botWarCard]);
                 setGameMessage("You win the war!");
                 setIsWar(false);
             } else if (playerValue < botValue) {
+                if (oldWar) {
+                    setBotDeck((prev) => [...prev, ...oldWar]);
+                }
                 setBotDeck((prev) => [...prev, ...botWarCards, ...playerWarCards, botWarCard, playerWarCard]);
                 setGameMessage("Bot wins the war!");
                 setIsWar(false);
             } else {
                 setGameMessage("Another tie! Continue the war!");
+                setOldWar([...playerWarCards, ...botWarCards]);
             }
             setFlip(!flip);
         } else {
@@ -222,6 +230,7 @@ function GameTable({user, isGuest, guestUsername}) {
                 setGameMessage("Bot wins this round!");
             } else {
                 setIsWar(true);
+                setOldWar(null);
                 setGameMessage("It's a tie! War begins!");
             }
             setFlip(!flip);
