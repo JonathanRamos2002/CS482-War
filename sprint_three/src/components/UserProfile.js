@@ -11,6 +11,7 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
   const [showStats, setShowStats] = useState(false); // State to control stats display
   const [wins, setWins] = useState(0); // State to store wins
   const [losses, setLosses] = useState(0); // State to store losses
+  const [isAdmin, setIsAdmin] = useState(false);
   const [newUsername, setNewUsername] = useState(user.email || '');
   const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
@@ -41,6 +42,7 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
         const userData = userSnapshot.data();
         const myUsername = userData.username;
         setUsername(myUsername);
+        setIsAdmin(userData.isAdmin || false);
       }
     } catch (error) {
       console.error(error);
@@ -126,6 +128,11 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
             >
               {showStats ? 'Hide Stats' : 'Display Stats'}
             </button>
+            {isAdmin && (
+              <button className="ads-button"
+              onClick={() => window.location.href = '/admin-ads'}
+              >Ads</button>
+            )}
           </>
         ) : (
           <div className="edit-profile-form">

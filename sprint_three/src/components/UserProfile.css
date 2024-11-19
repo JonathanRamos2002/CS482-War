@@ -90,3 +90,19 @@
     margin-top: 10px;
     text-align: center;
 }
+
+.ads-button {
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .ads-button:hover {
+    background-color: #0056b3;
+  }
+  
