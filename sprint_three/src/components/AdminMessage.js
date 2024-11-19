@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, doc, getDoc } from 'firebase/firestore';
+import './AdminMessage.css';
 
 const AdminMessage = ({ user }) => {
   const [message, setMessage] = useState('');
