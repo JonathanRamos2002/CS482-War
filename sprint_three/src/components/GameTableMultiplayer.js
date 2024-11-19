@@ -52,6 +52,10 @@ function GameTableMultiplayer({ user1 }) {
     const [card2, setCard2] = useState({});
     const [deck2, setDeck2] = useState([]);
 
+    const [flip, setFlip] = useState(true);
+    const [cardPosition, setCardPosition] = useState({ x: 0, y: 290 });
+    const [isDragging, setIsDragging] = useState(false);
+    const [isWar, setIsWar] = useState(false); // Track whether it's a war
  
     // Game state
     const [gameMessage, setGameMessage] = useState("Click 'Deal Cards' to start the game.");
@@ -248,6 +252,61 @@ function GameTableMultiplayer({ user1 }) {
         }
     };
 
+    const handleMouseDown = (e) => {
+        setIsDragging(true);
+        e.preventDefault();
+    };
+
+    const handleMouseUpContainer = () => {
+        setIsDragging(false);
+    }
+
+    const handleMouseUp = () => {
+        setIsDragging(false);
+        const deckElement = document.querySelector('.player-deck-drag');
+        const dropZoneElement = document.querySelector('.drop-zone');
+
+        if(deckElement && dropZoneElement) {
+            const deckRect = deckElement.getBoundingClientRect();
+            const dropZoneRect = dropZoneElement.getBoundingClientRect();
+
+            const isInDropZone = (
+                deckRect.left < dropZoneRect.right &&
+                deckRect.right > dropZoneRect.left &&
+                deckRect.top < dropZoneRect.bottom &&
+                deckRect.bottom > dropZoneRect.top 
+            );
+
+            if (isInDropZone) {
+                if (isWar) {
+                    playRound()
+                    setCardPosition({ x: 0, y: 290 });
+                } else {
+                    setCardPosition({ x: 0, y: 290 });
+                    playRound()
+                }
+            }
+        }
+    };
+
+    const handleDrag = (event) => {
+        if (isDragging) {
+            event.preventDefault();
+            const container = document.querySelector('.game-board');
+            const containerRect = container.getBoundingClientRect();
+
+            const cardElement = document.querySelector('.player-deck-drag');
+            const cardWidth = cardElement.offsetWidth;
+            const cardHeight = cardElement.offsetHeight;
+
+            const newPosition = {
+                x: event.clientX - containerRect.left - cardWidth / 2,
+                y: event.clientY - containerRect.top - cardHeight / 2,
+            };
+            setCardPosition(newPosition);
+        }
+    };
+
     const playRound = async () => {
         if (!deck1.length || !deck2.length) {
             setGameMessage("Game over! One of the players is out of cards.");
@@ -257,121 +316,54 @@ function GameTableMultiplayer({ user1 }) {
         const tableID = gameDocuments[0].id;
         const tablesRef = doc(db, 'tables', tableID);
     
-        // Draw a card from each deck
-        let newCard1 = deck1[0];
-        let newCard2 = deck2[0];
+        const newCard1 = deck1[0];
+        const newCard2 = deck2[0];
     
-        // Remove the drawn card from each deck
         let updatedDeck1 = deck1.slice(1);
         let updatedDeck2 = deck2.slice(1);
     
-        // Update each player's score based on card comparison
-        let updatedPoints1 = points1;
-        let updatedPoints2 = points2;
-        let roundMessage;
-    
-        const cardValue1 = CARD_VALUE_MAP[newCard1.value];
-        const cardValue2 = CARD_VALUE_MAP[newCard2.value];
-    
-        if (cardValue1 > cardValue2) {
-            roundMessage = `${username1} last won!`;
+        let message;
+        if (CARD_VALUE_MAP[newCard1.value] > CARD_VALUE_MAP[newCard2.value]) {
             updatedDeck1 = [...updatedDeck1, newCard1, newCard2];
-            updatedPoints1 = updatedDeck1.length;
-            updatedPoints2 = updatedDeck2.length;
-        } else if (cardValue1 < cardValue2) {
-            roundMessage = `${username2} last won!`;
+            message = `${username1} won this round!`;
+        } else if (CARD_VALUE_MAP[newCard1.value] < CARD_VALUE_MAP[newCard2.value]) {
             updatedDeck2 = [...updatedDeck2, newCard1, newCard2];
-            updatedPoints1 = updatedDeck1.length;
-            updatedPoints2 = updatedDeck2.length;
+            message = `${username2} won this round!`;
         } else {
-            roundMessage = "WAR!";
-            // for now just add them back into the deck
-            //updatedDeck1 = [...updatedDeck1, newCard1];
-            //updatedDeck2 = [...updatedDeck2, newCard2];
-            //updatedPoints1 = updatedDeck1.length;
-            //updatedPoints2 = updatedDeck2.length;
-
-            let warCards = [];
-            warCards.push(newCard1);
-            warCards.push(newCard2);
-
-            for (let i = 0; i < 3; i++) {
-                if (deck1.length > 0) warCards.push(deck1[i]);
-                if (deck2.length > 0) warCards.push(deck2[i]);
-                updatedDeck1 = deck1.slice(3);
-                updatedDeck2 = deck2.slice(3);
-            }
-
-            if (deck1.length === 0){ 
-                setGameMessage(`${username2} wins the game! ${username1} ran out cards during war :(`);
-                return;
-            } else if (deck2.length === 0) {
-                setGameMessage(`${username1} wins the game :) ${username2} ran out cards during war!`);
-                return;
-            }
-
-            const warCard1 = deck1[0];
-            const warCard2 = deck2[0];
-            warCards.push(warCard1, warCard2);
-            updatedDeck1 = deck1.slice(1);
-            updatedDeck2 = deck2.slice(1);
-
-            const warCard1Value = CARD_VALUE_MAP[warCard1.value];
-            const warCard2Value = CARD_VALUE_MAP[warCard2.value];
-
-            if (warCard1Value > warCard2Value) {
-                updatedDeck1 = [...updatedDeck1, ...warCards];
-                roundMessage = `${username1} won the war!`;
-            } else if (warCard1Value < warCard2Value) {
-                updatedDeck2 = [...updatedDeck2, ...warCards];
-                roundMessage = `${username2} won the war!`;
-            }
-
+            message = "It's a tie! Cards go back to the decks.";
+            updatedDeck1 = [...updatedDeck1, newCard1];
+            updatedDeck2 = [...updatedDeck2, newCard2];
         }
     
-        // Update Firestore with the new scores, decks, and current cards
         const updatedPlayers = gameDocuments[0].players.map((player) => {
             if (player.id === user1.uid) {
-                return {
-                    ...player,
-                    currentCard: updatedDeck1[0],
-                    deck: updatedDeck1,
-                    score: updatedPoints1,
-                };
-            } else {
-                return {
-                    ...player,
-                    currentCard: updatedDeck2[0],
-                    deck: updatedDeck2,
-                    score: updatedPoints2,
-                };
+                return { ...player, deck: updatedDeck1, currentCard: newCard1, score: updatedDeck1.length };
             }
+            return { ...player, deck: updatedDeck2, currentCard: newCard2, score: updatedDeck2.length };
         });
     
         try {
             await updateDoc(tablesRef, { players: updatedPlayers });
-            setPoints1(updatedPoints1);
-            setPoints2(updatedPoints2);
-            setCard1(newCard1);
-            setCard2(newCard2);
             setDeck1(updatedDeck1);
             setDeck2(updatedDeck2);
-            setGameMessage(roundMessage);
+            setCard1(newCard1);
+            setCard2(newCard2);
+            setGameMessage(message);
         } catch (error) {
-            console.error("Error updating game data in Firestore:", error);
+            console.error("Failed to update game data:", error);
         }
     };
     
     
     return (
-        <div className='game-container'>
+        <div className='game-container' onMouseMove={handleDrag} onMouseUp={handleMouseUpContainer}>
             <div className="players-info">
                 <img src={selectedImage2} alt="Player 2 avatar" className="profile-picture" />
                 <p className='username'>{username2} : {points2}</p>
             </div>
 
 
-            <div className="game-board">
+            <div className="game-board" onMouseMove={handleDrag}>
                 {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
                 { (deck1 === undefined || deck2 === undefined || deck1.length === 0 || deck2.length === 0) && (
                     <img
@@ -381,7 +373,6 @@ function GameTableMultiplayer({ user1 }) {
                     />
                 )}
 
-                {/* Show the bot's deck */}
                 { (deck1 && deck2) && (deck2.length > 0) && (
                     <img
                         src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
@@ -392,29 +383,92 @@ function GameTableMultiplayer({ user1 }) {
 
                 {/* Show the chosen cards */}
                 <div className='drawn-cards-container'>
-                    { ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
-                        <div className="card-wrapper">
-                            <span className="card-label">{username2}</span>
-                            <img
-                                src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
-                                alt="Player 2's Card"
-                                className="bot-card"
-                            />
-                        </div>
-                    )}
+                    <div className='bot-zone'>
+                        { ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
+                            <div className="card-wrapper-bot">
+                                <span className="card-label">player2</span>
+                                <img
+                                    key={flip}
+                                    src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
+                                    alt="player 2's Card"
+                                    className='bot-card'
+                                />
+
+                                {isWar && (
+                                    <div className="war-cards">
+                                        {[...Array(3)].map((_, index) => (
+                                            <img
+                                                key={index}
+                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                                alt={`War facedown card ${index + 1}`}
+                                                className={`facedown-card facedown-card-${index + 1}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    <div className='drop-zone'>
+                        { ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
+                            <div className="card-wrapper-player">
+                                <span className="card-label">player1</span>
+                                <img
+                                    key={flip}
+                                    src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
+                                    alt="Player's Card"
+                                    className='player-card'
+                                />
+
+                                {isWar && (
+                                    <div className="war-cards">
+                                        {[...Array(3)].map((_, index) => (
+                                            <img
+                                                key={index}
+                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                                alt={`War facedown card ${index + 1}`}
+                                                className={`facedown-card facedown-card-${index + 1}`}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                 
-                    { ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
-                        <div className="card-wrapper">
-                            <span className="card-label">{username1}</span>
-                            <img
-                                src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
-                                alt="Player 1's Card"
-                                className="player-card"
-                            />
-                        </div>
-                    )}
-                
+
+                        {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
+                        { (!deck1 && !deck2) && (
+                            <div className="full-deck-container">
+                                <button onClick={beginGame}>
+                                    <img
+                                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                        alt="Backside of the entire Deck"
+                                        className="full-deck"
+                                    />
+                                </button>
+                                <div className="full-deck-swap1"></div> {/* First animated card */}
+                                <div className="full-deck-swap2"></div> {/* Second animated card */}
+                            </div>
+                        )}
+                    </div>
                 </div>
+
+                {/* Show the player's interactive card */}
+                { (deck1 && deck2) && deck1.length > 0 && (
+                    <img
+                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                        alt="Backside of the player's Deck"
+                        className="player-deck-drag"
+                        style={{
+                            top: `${cardPosition.y}px`,
+                            left: `${cardPosition.x}px`,
+                            position: 'absolute',
+                        }}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUp}
+                    />
+                )}
 
                 {/* Show the player's deck */}
                 { (deck1 && deck2) && deck1.length > 0 && (
