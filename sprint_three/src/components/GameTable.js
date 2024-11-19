@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import {storage} from '../firebase';
 import {ref, getDownloadURL} from 'firebase/storage';
-import { getFirestore, doc, getDoc} from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
 import './GameTable.css'; 
 import { useNavigate } from 'react-router-dom';
 import Deck from "../deck.js"
+import { incrementWins, incrementLosses} from "./UserProfile.js";
 
 const CARD_VALUE_MAP = {
     "2": 2,
@@ -79,6 +80,7 @@ function GameTable({user, isGuest, guestUsername}) {
          getUsername();
      }, [db, imageFetched, user, isGuest]);
 
+
     const restartGame = () => {
         setPlayerDeck(null);
         setBotDeck(null);
@@ -139,9 +141,11 @@ function GameTable({user, isGuest, guestUsername}) {
             // check if a player has run out of cards
             if (playerDeck.length === 0) {
                 setGameMessage("Bot Wins the Game! You ran out of cards during war :(");
+                incrementLosses(db, user);
                 return;
             } else if (botDeck.length === 0) {
-                setGameMessage("You Win the Game! Bot ran out of cards during war :)");
+                setGameMessage("You Win the currentUserGame! Bot ran out of cards during war :)");
+                incrementWins(db, user);
                 return;
             }
 

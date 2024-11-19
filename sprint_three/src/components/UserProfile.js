@@ -3,6 +3,68 @@ import { storage } from '../firebase';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import './UserProfile.css';
+import { increment } from 'firebase/firestore';
+
+// Increment wins dynamically
+export const incrementWins = async (db, currentUser) => {
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+
+      // If the wins field does not exist, initialize it to 0 before incrementing
+      if (userData.wins === undefined) {
+        await updateDoc(userRef, { wins: 0 });
+      }
+      if (userData.losses === undefined) {
+        await updateDoc(userRef, {losses: 0});
+      }
+
+      // Increment the wins field
+      await updateDoc(userRef, {
+        wins: increment(1),
+      });
+      console.log('Wins incremented by 1.');
+    } else {
+      console.error('User document does not exist.');
+    }
+  } catch (error) {
+    console.error('Error incrementing wins:', error);
+  }
+};
+
+// Increment losses dynamically
+export const incrementLosses = async (db, currentUser) => {
+  try {
+    const userRef = doc(db, 'users', currentUser.uid);
+    const userSnapshot = await getDoc(userRef);
+
+    if (userSnapshot.exists()) {
+      const userData = userSnapshot.data();
+
+      // If the losses field does not exist, initialize it to 0 before incrementing
+      if (userData.losses === undefined) {
+        await updateDoc(userRef, { losses: 0 });
+      }
+      if (userData.wins === undefined) {
+        await updateDoc(userRef, {wins: 0});
+      }
+
+      // Increment the losses field
+      await updateDoc(userRef, {
+        losses: increment(1),
+      });
+      console.log('Losses incremented by 1.');
+    } else {
+      console.error('User document does not exist.');
+    }
+  } catch (error) {
+    console.error('Error incrementing losses:', error);
+  }
+};
+
 
 function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout }) {
   const [imageFetched, setImageFetched] = useState(false);
