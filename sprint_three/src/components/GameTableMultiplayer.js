@@ -40,6 +40,7 @@ function GameTableMultiplayer({ user1 }) {
     const [imageFetched1, setImageFetched1] = useState(false);
     const [selectedImage1, setSelectedImage1] = useState(placeholder);
     const [username1, setUsername1] = useState(user1.email || '');
+    const [userUID, setUserUID] = useState(user1.uid);
     const [points1, setPoints1] = useState(0);
     const [card1, setCard1] = useState({});
     const [deck1, setDeck1] = useState([]);
@@ -80,7 +81,7 @@ function GameTableMultiplayer({ user1 }) {
                 const querySnapshot = await getDocs(q);
                 if (!querySnapshot.empty) {
                     const firstDoc = querySnapshot.docs[0]; // Get the first matching document
-                    console.log("DocumentID:", firstDoc.id);
+                    //console.log("DocumentID:", firstDoc.id);
                     setDocumentID(firstDoc.id); // Store the document ID in state
                 } else {
                     console.log("No matching document found.");
@@ -101,9 +102,19 @@ function GameTableMultiplayer({ user1 }) {
         const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
             if (docSnapshot.exists()) {
                 const data = docSnapshot.data();
-                console.log("Document data:", data);
+                //console.log("Document data:", data);
                 // Handle the data (e.g., update state)
                 setGameDocument(data);
+                data.status === "full" ? setGameMessage("game ready") : setGameMessage(data.status);
+                const players = data.players || [];
+                setDeck1(players[0]?.deck || []);
+                setCard1(players[0]?.currentCard || null);
+                setPoints1(players[0]?.score || 0); 
+
+                setDeck2(players[1]?.deck || []);
+                setCard2(players[1]?.currentCard || null);
+                setPoints2(players[1]?.score || 0); 
+                
             } else {
                 console.log("Document does not exist!");
             }
@@ -182,6 +193,70 @@ function GameTableMultiplayer({ user1 }) {
         When the cards are dealt, it is reflected in  our Database (Firebase/Firestore) which ensures the live gamestate is reflected for both players on the front-end. 
         Additionally, this code also handles errors appropriately 
     */
+    const beginGame = async () => {
+    if (!db || !gameDocument || !user1) {
+        console.error("Database, game document, or user data is missing.");
+        return;
+    }
+    
+    const tablesRef = doc(db, 'tables', documentID);
+    
+    try {
+        const tableDoc = await getDoc(tablesRef);
+
+        if (!tableDoc.exists()) {
+            console.error("Table document not found.");
+            return;
+        }
+
+        const tableData = tableDoc.data();
+        //console.log("tableDATA:", tableData);
+
+        // Initialize and shuffle the deck
+        const deck = new Deck();
+        if (!deck.cards || deck.cards.length === 0) {
+            console.error("Deck is not initialized correctly.");
+            return;
+        }
+        deck.shuffle();
+
+        // Divide the deck into two halves
+        const half = Math.ceil(deck.cards.length / 2);
+        const playerDeck1 = deck.cards.slice(0, half);
+        const playerDeck2 = deck.cards.slice(half);
+
+        // Prepare player data
+        const updatedPlayers = tableData.players.map((player) => {
+            const isCurrentPlayer = player.id === user1.uid;
+            const assignedDeck = isCurrentPlayer ? playerDeck1 : playerDeck2;
+
+            // Ensure cards are converted to plain objects (suit, value)
+            const currentCard = assignedDeck.length > 0 ? {suit: assignedDeck[0].suit, value: assignedDeck[0].value} : null;
+
+            // Only store the suit and value of each card
+            const normalizedDeck = assignedDeck.map(card => ({
+                suit: card.suit,
+                value: card.value,
+            }));
+
+            return {
+                ...player,
+                currentCard,
+                deck: normalizedDeck,
+                score: assignedDeck.length,
+            };
+        });
+
+        // Update Firestore with the new game state
+        await updateDoc(tablesRef, {
+            players: updatedPlayers,
+            status: "game started",
+        });
+
+        } catch (error) {
+            console.error("Error starting the game:", error);
+        }
+    };
 
     const handleMouseDown = (e) => {
         setIsDragging(true);
@@ -248,14 +323,7 @@ function GameTableMultiplayer({ user1 }) {
 
 
             <div className="game-board" onMouseMove={handleDrag}>
-                {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
-                { (deck1 === undefined || deck2 === undefined || deck1.length === 0 || deck2.length === 0) && (
-                    <img
-                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                        alt="Backside of a Card"
-                        className="card-backside"
-                    />
-                )}
+                
 
                 { (deck1 && deck2) && (deck2.length > 0) && (
                     <img
@@ -268,7 +336,7 @@ function GameTableMultiplayer({ user1 }) {
                 {/* Show the chosen cards */}
                 <div className='drawn-cards-container'>
                     <div className='bot-zone'>
-                        { ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
+                        { (userUID === creatorUID) && ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
                             <div className="card-wrapper-bot">
                                 <span className="card-label">player2</span>
                                 <img
@@ -277,25 +345,10 @@ function GameTableMultiplayer({ user1 }) {
                                     alt="player 2's Card"
                                     className='bot-card'
                                 />
-
-                                {isWar && (
-                                    <div className="war-cards">
-                                        {[...Array(3)].map((_, index) => (
-                                            <img
-                                                key={index}
-                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                                                alt={`War facedown card ${index + 1}`}
-                                                className={`facedown-card facedown-card-${index + 1}`}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
                             </div>
                         )}
-                    </div>
 
-                    <div className='drop-zone'>
-                        { ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
+                        { (userUID !== creatorUID) && ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
                             <div className="card-wrapper-player">
                                 <span className="card-label">player1</span>
                                 <img
@@ -304,37 +357,53 @@ function GameTableMultiplayer({ user1 }) {
                                     alt="Player's Card"
                                     className='player-card'
                                 />
+                            </div>
+                            
+                        )}
 
-                                {isWar && (
-                                    <div className="war-cards">
-                                        {[...Array(3)].map((_, index) => (
-                                            <img
-                                                key={index}
-                                                src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                                                alt={`War facedown card ${index + 1}`}
-                                                className={`facedown-card facedown-card-${index + 1}`}
-                                            />
-                                        ))}
-                                    </div>
-                                )}
+                    </div>
+
+                    <div className='drop-zone'>
+                        {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
+                        { (deck1 === undefined || deck2 === undefined || deck1.length === 0 || deck2.length === 0) && (
+                                <div className="full-deck-container">
+                                    <button onClick={beginGame}>
+                                        <img
+                                            src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
+                                            alt="Backside of a Card"
+                                            className="full-deck"
+                                        />    
+                                    </button>
+                                    <div className="full-deck-swap1"></div> {/* First animated card */}
+                                    <div className="full-deck-swap2"></div> {/* Second animated card */}
+                                </div>      
+                            )}
+
+                        { (userUID === creatorUID) && ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
+                            <div className="card-wrapper-player">
+                                <span className="card-label">player1</span>
+                                <img
+                                    key={flip}
+                                    src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
+                                    alt="Player's Card"
+                                    className='player-card'
+                                />
+                            </div>
+                            
+                        )}
+
+                        { (userUID !== creatorUID) && ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
+                            <div className="card-wrapper-bot">
+                                <span className="card-label">player2</span>
+                                <img
+                                    key={flip}
+                                    src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
+                                    alt="player 2's Card"
+                                    className='bot-card'
+                                />
                             </div>
                         )}
                 
-
-                        {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
-                        { (!deck1 && !deck2) && (
-                            <div className="full-deck-container">
-                                <button>
-                                    <img
-                                        src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
-                                        alt="Backside of the entire Deck"
-                                        className="full-deck"
-                                    />
-                                </button>
-                                <div className="full-deck-swap1"></div> {/* First animated card */}
-                                <div className="full-deck-swap2"></div> {/* Second animated card */}
-                            </div>
-                        )}
                     </div>
                 </div>
 
