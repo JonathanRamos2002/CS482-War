@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { UserIcon, PlusCircle, Users } from 'lucide-react';
 import { getFirestore, collection, addDoc, onSnapshot,doc,updateDoc, deleteDoc, query,orderBy} from 'firebase/firestore';
 import './Lobby.css';
+import AdminMessage from './AdminMessage';
 
 
 const Lobby = ({ user, isGuest, guestUsername }) => {
@@ -129,6 +130,7 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
     <div className="lobby-container">
       <div className="lobby-header">
         <h2 className="lobby-title">Welcome to the Lobby!</h2>
+        <AdminMessage user={user} />
         <button onClick={() => navigate('/profile')} className="profile-button">
           <UserIcon className="profile-icon" />
         </button>
