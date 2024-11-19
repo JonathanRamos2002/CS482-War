@@ -128,9 +128,9 @@ const Lobby = ({ user, isGuest, guestUsername }) => {
 
   return (
     <div className="lobby-container">
+      <AdminMessage user={user} />
       <div className="lobby-header">
         <h2 className="lobby-title">Welcome to the Lobby!</h2>
-        <AdminMessage user={user} />
         <button onClick={() => navigate('/profile')} className="profile-button">
           <UserIcon className="profile-icon" />
         </button>
