@@ -28,14 +28,19 @@
     padding: 0.5rem;
     border-radius: 0.375rem;
     border: 1px solid rgba(185, 214, 255, 0.2);
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.3); /* Darker background */
     color: #b9d6ff;
-  }
-  
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none; /* Remove default styling */
+}
+
   .message-input:focus {
     outline: none;
     border-color: #4f83ff;
   }
+  .message-input::placeholder {
+    color: rgba(185, 214, 255, 0.5); /* Lighter blue for placeholder text */
+}
   
   .send-button {
     padding: 0.5rem 1rem;
@@ -50,3 +55,5 @@
   .send-button:hover {
     background-color: #3a6fbf;
   }
+
+  
