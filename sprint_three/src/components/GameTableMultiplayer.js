@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {storage} from '../firebase.js';
 import {ref, getDownloadURL} from 'firebase/storage';
 import { getFirestore, doc, getDoc, getDocs, updateDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
 import './GameTableMultiplayer.css'; 
 import { useNavigate } from 'react-router-dom';
 import Deck from "../deck.js"
+import { UserIcon, Rocket } from 'lucide-react';
 
 const CARD_VALUE_MAP = {
     "2": 2,
@@ -37,26 +38,23 @@ function GameTableMultiplayer({ user1 }) {
     const [creatorUID, setCreatorUID] = useState('');
 
     // User1 Info
-    const [imageFetched1, setImageFetched1] = useState(false);
     const [selectedImage1, setSelectedImage1] = useState(placeholder);
     const [username1, setUsername1] = useState(user1.email || '');
-    const [userUID, setUserUID] = useState(user1.uid);
+    const userUID = user1.uid;
     const [points1, setPoints1] = useState(0);
     const [card1, setCard1] = useState({});
     const [deck1, setDeck1] = useState([]);
 
     // User2 Info
-    const [imageFetched2, setImageFetched2] = useState(false);
     const [selectedImage2, setSelectedImage2] = useState(placeholder);
     const [username2, setUsername2] = useState('');
     const [points2, setPoints2] = useState(0);
     const [card2, setCard2] = useState({});
     const [deck2, setDeck2] = useState([]);
 
-    const [flip, setFlip] = useState(true);
+    const flip = true;
     const [cardPosition, setCardPosition] = useState({ x: 0, y: 290 });
     const [isDragging, setIsDragging] = useState(false);
-    const [isWar, setIsWar] = useState(false); // Track whether it's a war
  
     // Game state
     const [gameMessage, setGameMessage] = useState("Click 'Deal Cards' to start the game.");
@@ -152,7 +150,7 @@ function GameTableMultiplayer({ user1 }) {
         };
 
         fetchProfilePicturesOnce();
-    }, [user1, gameDocument]); // Only runs when 'gameDocument' is first set
+    }, [user1, gameDocument, placeholder, selectedImage2]); // Only runs when 'gameDocument' is first set
 
 
     const usernamesFetched = useRef(false);
@@ -185,7 +183,7 @@ function GameTableMultiplayer({ user1 }) {
         };
 
         fetchUsernamesOnce();
-    }, [user1, gameDocument]); // Only runs when 'gameDocument' is first set
+    }, [user1, gameDocument, db, username2]); // Only runs when 'gameDocument' is first set
 
 
     /*  CHECK THIS OUT Jonathan, I would like to highlight this section of code because it establishes the foundation for the multiplayer game. 
@@ -231,7 +229,7 @@ function GameTableMultiplayer({ user1 }) {
             const assignedDeck = isCurrentPlayer ? playerDeck1 : playerDeck2;
 
             // Ensure cards are converted to plain objects (suit, value)
-            const currentCard = assignedDeck.length > 0 ? {suit: assignedDeck[0].suit, value: assignedDeck[0].value} : null;
+            const currentCard = null; //assignedDeck.length > 0 ? {suit: assignedDeck[0].suit, value: assignedDeck[0].value} : null;
 
             // Only store the suit and value of each card
             const normalizedDeck = assignedDeck.map(card => ({
@@ -256,6 +254,10 @@ function GameTableMultiplayer({ user1 }) {
         } catch (error) {
             console.error("Error starting the game:", error);
         }
+    };
+
+    const waitForHost = async () => {
+        setGameMessage("Please wait for the host");
     };
 
     const handleMouseDown = (e) => {
@@ -284,13 +286,8 @@ function GameTableMultiplayer({ user1 }) {
             );
 
             if (isInDropZone) {
-                if (isWar) {
-                    //playRound()
-                    setCardPosition({ x: 0, y: 290 });
-                } else {
-                    setCardPosition({ x: 0, y: 290 });
-                    //playRound()
-                }
+                setCurrentCard();
+                setCardPosition({ x: 0, y: 290 });
             }
         }
     };
@@ -312,13 +309,179 @@ function GameTableMultiplayer({ user1 }) {
             setCardPosition(newPosition);
         }
     };
+
+    const setCurrentCard = async () => {
+        if (!db || !gameDocument || !user1) {
+            console.error("Database, game document, or user data is missing.");
+            return;
+        }
+
+        const tablesRef = doc(db, 'tables', documentID);
+    
+        try {
+            const tableDoc = await getDoc(tablesRef);
+
+            if (!tableDoc.exists()) {
+                console.error("Table document not found.");
+                return;
+            }
+
+            const tableData = tableDoc.data();
+
+            const updatedPlayers = tableData.players.map((player) => {
+                if (player.id === userUID) {
+                    if (player.deck.length === 0) {
+                        console.error("No cards left in the deck!"); //someone should lose here
+                        return player;
+                    }
+    
+                    // Update the current card and remove it from the deck
+                    const [newCurrentCard, ...remainingDeck] = player.deck;
+    
+                    return {
+                        ...player,
+                        currentCard: newCurrentCard,
+                        deck: remainingDeck,
+                        score: remainingDeck.length
+                    };
+                }
+                return player; // No changes for the other players
+            });
+
+            let mystatus = "";
+
+            if (userUID === creatorUID) {
+                // i am player 1, check if player 2 has a card
+                if(!updatedPlayers[1].currentCard){
+                    mystatus = "waiting for player 2";
+                } else {
+                    mystatus = "both ready";
+                }
+            }
+            else {
+                // i am player 2, check if player 1 / host has a card
+                if(!updatedPlayers[0].currentCard){
+                    mystatus = "waiting for host"
+                } else {
+                    mystatus = "both ready";
+                }
+            }
+
+            // Update Firestore with the new state
+            await updateDoc(tablesRef, {
+                players: updatedPlayers,
+                status: mystatus
+            });
+
+            console.log("Current card updated successfully!");
+        } catch (error) {
+            console.error("Error setting player's card:", error);
+        }
+
+    };
+
+    const [removingCards, setRemovingCards] = useState(false);
+
+    const playRound = useCallback(async () => {
+        // once both cards are set, decide what to do (i.e. play the card logic as normal)
+        // at the end set currentCard in the db to null for both players
+        if (!db || !gameDocument || !user1) {
+            console.error("Database, game document, or user data is missing.");
+            return;
+        }
+    
+        const tablesRef = doc(db, 'tables', documentID);
+    
+        try {
+            const tableDoc = await getDoc(tablesRef);
+    
+            if (!tableDoc.exists()) {
+                console.error("Table document not found.");
+                return;
+            }
+    
+            const tableData = tableDoc.data();
+            const players = tableData.players;
+    
+            if (players.length !== 2) {
+                console.error("Insufficient players to play a round.");
+                return;
+            }
+    
+            const player1 = players[0];
+            const player2 = players[1];
+    
+            if (!player1.currentCard || !player2.currentCard) {
+                console.error("Both players must have a card to play a round.");
+                return;
+            }
+    
+            const card1Value = CARD_VALUE_MAP[player1.currentCard.value];
+            const card2Value = CARD_VALUE_MAP[player2.currentCard.value];
+    
+            let updatedPlayers;
+            let mystatus;
+    
+            if (card1Value > card2Value) {
+                // Player 1 wins the round
+                mystatus = "host wins"
+                player1.deck = [...player1.deck, player1.currentCard, player2.currentCard];
+            } else if (card1Value < card2Value) {
+                // Player 2 wins the round
+                mystatus = "player 2 wins"
+                player2.deck = [...player2.deck, player2.currentCard, player1.currentCard];
+            } else {
+                // Handle a tie (War)
+                mystatus = "war...returning cards"
+                player1.deck = [...player1.deck, player1.currentCard];
+                player2.deck = [...player2.deck, player2.currentCard];
+            }
+    
+            // update player scores
+            player1.score = player1.deck.length;
+            player2.score = player2.deck.length;
+    
+            // Update the players' state in Firestore
+            updatedPlayers = [player1, player2];
+    
+            await updateDoc(tablesRef, {
+                players: updatedPlayers,
+                status: mystatus
+            });
+    
+            console.log("Round played successfully!");
+
+            setRemovingCards(true);
+            // Delay clearing currentCard for a second
+            setTimeout(async () => {
+                setRemovingCards(false);
+                player1.currentCard = null;
+                player2.currentCard = null;
+
+                await updateDoc(tablesRef, {
+                    players: [player1, player2],
+                });
+
+                console.log("Cards cleared from the screen.");
+            }, 1500); // 1000ms = 1 second
+    
+        } catch (error) {
+            console.error("Error playing round:", error);
+        }
+    }, [db, documentID, gameDocument, user1]);
+
+    useEffect(() => {
+        if (gameMessage === "both ready") {
+            playRound();
+        }
+    }, [gameMessage, playRound]);
     
     
     return (
         <div className='game-container' onMouseMove={handleDrag} onMouseUp={handleMouseUpContainer}>
             <div className="players-info">
                 <img src={selectedImage2} alt="Player 2 avatar" className="profile-picture" />
-                <p className='username'>{username2} : {points2}</p>
+                <p className='username'>{username2} : {userUID === creatorUID ? points2 : points1}</p>
             </div>
 
 
@@ -338,24 +501,24 @@ function GameTableMultiplayer({ user1 }) {
                     <div className='bot-zone'>
                         { (userUID === creatorUID) && ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
                             <div className="card-wrapper-bot">
-                                <span className="card-label">player2</span>
+                                <span className="card-label">{username2}</span>
                                 <img
                                     key={flip}
                                     src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
                                     alt="player 2's Card"
-                                    className='bot-card'
+                                    className={`bot-card ${removingCards ? 'removing' : ''}`}
                                 />
                             </div>
                         )}
 
                         { (userUID !== creatorUID) && ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
                             <div className="card-wrapper-player">
-                                <span className="card-label">player1</span>
+                                <span className="card-label">{username2}</span>
                                 <img
                                     key={flip}
                                     src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
                                     alt="Player's Card"
-                                    className='player-card'
+                                    className={`player-card ${removingCards ? 'removing' : ''}`}
                                 />
                             </div>
                             
@@ -367,7 +530,7 @@ function GameTableMultiplayer({ user1 }) {
                         {/* Show the 'stack' of cards at the beginning of the game in the center of the gameboard*/}
                         { (deck1 === undefined || deck2 === undefined || deck1.length === 0 || deck2.length === 0) && (
                                 <div className="full-deck-container">
-                                    <button onClick={beginGame}>
+                                    <button onClick={userUID === creatorUID ? beginGame : waitForHost}>
                                         <img
                                             src={`${process.env.PUBLIC_URL}/images/Cards/cardBack_blue5.png`}
                                             alt="Backside of a Card"
@@ -381,12 +544,12 @@ function GameTableMultiplayer({ user1 }) {
 
                         { (userUID === creatorUID) && ((deck1 && deck1.length > 0) && (deck2 && deck2.length > 0)) && card1 && (
                             <div className="card-wrapper-player">
-                                <span className="card-label">player1</span>
+                                <span className="card-label">{username1}</span>
                                 <img
                                     key={flip}
                                     src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card1.suit]}${card1.value}.png`}
                                     alt="Player's Card"
-                                    className='player-card'
+                                    className={`player-card ${removingCards ? 'removing' : ''}`}
                                 />
                             </div>
                             
@@ -394,12 +557,12 @@ function GameTableMultiplayer({ user1 }) {
 
                         { (userUID !== creatorUID) && ((deck2 && deck2.length > 0) && (deck1 && deck1.length > 0)) && card2 && (
                             <div className="card-wrapper-bot">
-                                <span className="card-label">player2</span>
+                                <span className="card-label">{username1}</span>
                                 <img
                                     key={flip}
                                     src={`${process.env.PUBLIC_URL}/images/Cards/card${CARD_SUIT_MAP[card2.suit]}${card2.value}.png`}
                                     alt="player 2's Card"
-                                    className='bot-card'
+                                    className={`bot-card ${removingCards ? 'removing' : ''}`}
                                 />
                             </div>
                         )}
@@ -437,14 +600,21 @@ function GameTableMultiplayer({ user1 }) {
 
             <div className="players-info">
                 <img src={selectedImage1} alt="Player 1 Avatar" className="profile-picture" />
-                <p className='username'>{username1} : {points1}</p>
+                <p className='username'>{username1} : {userUID === creatorUID ? points1 : points2}</p>
             </div>
+
+
             <div className="game-controls">
-                <button className='lobby-button' onClick={() => navigate('/profile')}>Go Back to Profile</button>
-                <p className="game-message">{gameMessage}</p>
-                { creatorUID === user1.uid && <button className='lobby-button'>Deal Cards</button>}
-                <button className='lobby-button'>Play Round</button>
-                <button className='lobby-button'>Restart</button>
+
+                <button onClick={() => navigate('/lobby')} className="profile-button">
+                    <Rocket className="profile-icon" />
+                </button>
+
+                <h2 className="game-message">{gameMessage}</h2>
+
+                <button onClick={() => navigate('/profile')} className="profile-button">
+                    <UserIcon className="profile-icon" />
+                </button>
             </div>
         </div>
     );
