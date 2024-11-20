@@ -426,10 +426,16 @@ function GameTableMultiplayer({ user1 }) {
                 // Player 1 wins the round
                 mystatus = "host wins"
                 player1.deck = [...player1.deck, player1.currentCard, player2.currentCard];
+                if(player2.deck.length === 0) {
+                    mystatus = "game over, host wins!"
+                }
             } else if (card1Value < card2Value) {
                 // Player 2 wins the round
                 mystatus = "player 2 wins"
                 player2.deck = [...player2.deck, player2.currentCard, player1.currentCard];
+                if(player1.deck.length === 0) {
+                    mystatus = "game over, player 2 wins!"
+                }
             } else {
                 // Handle a tie (War)
                 mystatus = "war...returning cards"
