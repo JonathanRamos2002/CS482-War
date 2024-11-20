@@ -5,6 +5,7 @@ import { getFirestore, doc, getDoc} from 'firebase/firestore';
 import './GameTable.css'; 
 import { useNavigate } from 'react-router-dom';
 import Deck from "../deck.js"
+import { UserIcon, RefreshCcw } from 'lucide-react';
 
 const CARD_VALUE_MAP = {
     "2": 2,
@@ -359,15 +360,21 @@ function GameTable({user, isGuest, guestUsername}) {
                 <img src={selectedImage} alt="User Avatar" className="profile-picture" />
                 <p className='username'>{isGuest ? guestUsername : username} : {!playerDeck ? 0 : playerDeck.length}</p>
             </div>
-      
+
             <div className="game-controls">
-                {/* Add controls for other actions */}
-                <button className='lobby-button' onClick={() => navigate('/profile')}>Go Back to Profile</button>
-                <p className="game-message">{gameMessage}</p>
-                <button className='lobby-button' onClick={dealCards}>Deal Cards</button>
-                <button className='lobby-button' onClick={playRound}>Play Round</button>
-                <button className='lobby-button' onClick={restartGame}>Restart</button>
+
+                <button onClick={() => navigate('/profile')} className="profile-button">
+                    <UserIcon className="profile-icon" />
+                </button>
+
+                <h2 className="game-message">{gameMessage}</h2>
+
+                <button className='profile-button' onClick={restartGame}>
+                    <RefreshCcw className='profile-icon'/>
+                </button>
+                
             </div>
+
         </div>
     );
 
