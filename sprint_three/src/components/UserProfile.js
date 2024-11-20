@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { storage } from '../firebase';
-import { ref, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
 import './UserProfile.css';
 import { increment } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore'; // For Firestore
+
 
 // Increment wins dynamically
 export const incrementWins = async (db, currentUser) => {
@@ -77,6 +79,55 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
   const [newUsername, setNewUsername] = useState(user.email || '');
   const [newEmail, setNewEmail] = useState(user.email || '');
   const db = getFirestore();
+
+  const [isAdsModalOpen, setIsAdsModalOpen] = useState(false);
+  const [adImage, setAdImage] = useState(null);
+  const [adTargetUrl, setAdTargetUrl] = useState('');
+  const [uploadingAd, setUploadingAd] = useState(false);
+
+  const handleAdImageUpload = async () => {
+    if (!adImage || !adTargetUrl) {
+      alert('Please upload an image and provide a URL.');
+      return;
+    }
+
+    console.log("Starting ad upload process...");
+    console.log("Ad image:", adImage);
+    console.log("Ad target URL:", adTargetUrl);
+
+    try {
+      setUploadingAd(true);
+
+      // Upload the image to Firebase Storage
+      console.log("Uploading image to Firebase Storage...");
+      const imageRef = ref(storage, `ads/${adImage.name}`);
+      await uploadBytes(imageRef, adImage);
+      console.log("Image uploaded successfully!");
+
+      // Get the URL of the uploaded image
+      const imageUrl = await getDownloadURL(imageRef);
+      console.log("Image URL retrieved:", imageUrl);
+
+      // Save ad details to Firestore
+      console.log("Saving ad details to Firestore...");
+      await addDoc(collection(db, 'ads'), {
+        imageUrl,
+        targetUrl: adTargetUrl,
+      });
+      console.log("Ad saved successfully in Firestore!");
+
+      alert('Ad uploaded successfully!');
+      setAdImage(null);
+      setAdTargetUrl('');
+      setIsAdsModalOpen(false);
+    } catch (error) {
+      console.error('Error during ad upload process:', error);
+      alert(`Failed to upload ad: ${error.message}`);
+    } finally {
+      setUploadingAd(false);
+    }
+  };
+
 
   const fetchProfileImage = async () => {
     if (!imageFetched) {
@@ -192,7 +243,7 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
             </button>
             {isAdmin && (
               <button className="ads-button"
-              onClick={() => window.location.href = '/admin-ads'}
+              onClick={() => setIsAdsModalOpen(true)}
               >Ads</button>
             )}
           </>
@@ -259,6 +310,31 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
         <button className="logout-button" onClick={() => setIsConfirming(true)}>
           Log Out
         </button>
+      )}
+      {isAdsModalOpen && (
+        <div className="ads-modal">
+          <h2>Upload Advertisement</h2>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setAdImage(e.target.files[0])}
+          />
+          <input
+            type="text"
+            placeholder="Enter Target URL"
+            value={adTargetUrl}
+            onChange={(e) => setAdTargetUrl(e.target.value)}
+          />
+          <button onClick={handleAdImageUpload} disabled={uploadingAd}>
+            {uploadingAd ? 'Uploading...' : 'Upload Ad'}
+          </button>
+          <button
+            onClick={() => setIsAdsModalOpen(false)}
+            className="close-modal-button"
+          >
+            Close
+          </button>
+          </div>
       )}
     </div>
   );
