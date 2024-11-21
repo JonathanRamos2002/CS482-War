@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserIcon, PlusCircle, Users, CoinIcon } from 'lucide-react';
+import { UserIcon, PlusCircle, Users} from 'lucide-react';
 import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, query, orderBy } from 'firebase/firestore';
 import './Lobby.css';
 import AdminMessage from './AdminMessage';
