@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { storage } from '../firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirestore, doc, getDoc, updateDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, getDocs, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import './UserProfile.css';
 import { increment } from 'firebase/firestore';
 import { collection, addDoc } from 'firebase/firestore'; // For Firestore
@@ -90,32 +90,42 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
       alert('Please upload an image and provide a URL.');
       return;
     }
-
+  
     console.log("Starting ad upload process...");
     console.log("Ad image:", adImage);
     console.log("Ad target URL:", adTargetUrl);
-
+  
     try {
       setUploadingAd(true);
-
-      // Upload the image to Firebase Storage
+  
+      const adsCollectionRef = collection(db, 'ads');
+  
+      // Step 1: Delete existing ads
+      const adsSnapshot = await getDocs(adsCollectionRef);
+      const deletePromises = adsSnapshot.docs.map((doc) =>
+        deleteDoc(doc.ref)
+      );
+      await Promise.all(deletePromises);
+      console.log("Old ads deleted successfully.");
+  
+      // Step 2: Upload the new ad image to Firebase Storage
       console.log("Uploading image to Firebase Storage...");
       const imageRef = ref(storage, `ads/${adImage.name}`);
       await uploadBytes(imageRef, adImage);
       console.log("Image uploaded successfully!");
-
-      // Get the URL of the uploaded image
+  
+      // Step 3: Get the URL of the uploaded image
       const imageUrl = await getDownloadURL(imageRef);
       console.log("Image URL retrieved:", imageUrl);
-
-      // Save ad details to Firestore
-      console.log("Saving ad details to Firestore...");
-      await addDoc(collection(db, 'ads'), {
+  
+      // Step 4: Save the new ad details to Firestore
+      console.log("Saving new ad details to Firestore...");
+      await addDoc(adsCollectionRef, {
         imageUrl,
         targetUrl: adTargetUrl,
       });
-      console.log("Ad saved successfully in Firestore!");
-
+      console.log("New ad saved successfully in Firestore!");
+  
       alert('Ad uploaded successfully!');
       setAdImage(null);
       setAdTargetUrl('');
@@ -127,7 +137,6 @@ function UserProfile({ user, setUser, selectedImage, setSelectedImage, onLogout 
       setUploadingAd(false);
     }
   };
-
 
   const fetchProfileImage = async () => {
     if (!imageFetched) {
