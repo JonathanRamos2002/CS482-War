@@ -11,6 +11,7 @@ import { AnimatedBackground } from 'animated-backgrounds';
 import Lobby from './components/Lobby';
 import GameTable from './components/GameTable';
 import GameTableMultiplayer from './components/GameTableMultiplayer';
+import Tutorial from './components/Tutorial';
 
 
 
@@ -24,6 +25,8 @@ function App() {
   const [guestUsername, setGuestUsername] = useState(''); // State to store guest username
   const [guestAvatar, setGuestAvatar] = useState(placeholder); // State to store guest avatar
   const navigate = useNavigate(); //hook for navigation
+  const [showTutorial, setShowTutorial] = useState(false);
+
 
 
   const handleLogin = () => {
@@ -80,6 +83,12 @@ function App() {
       <div className="middle-container">
         <UpdateAvatar user={user} setUser={setUser} selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
         <AddFriend currentUser={user} />
+        <button 
+        className="cosmic-button tutorial-button"
+        onClick={() => setShowTutorial(true)}
+      >
+        How to Play
+      </button>
       </div>
       <FriendsList currentUser={user} />
       <button className="cosmic-button" onClick={() => navigate('/lobby')}>
@@ -95,7 +104,6 @@ function App() {
   ( 
     <UserAuth onLogin={handleLogin} onGuestLogin={handleGuestLogin} />
   );
-
   /* 
    * Uncomment this code to change backgrounds on refresh, in AnimatedBackground component set animationName={animationName}
    * 
@@ -113,6 +121,9 @@ useEffect(() => {
   return (
     <div>
       <AnimatedBackground animationName='cosmicDust' />
+      {showTutorial && (
+        <Tutorial onClose={() => setShowTutorial(false)} />
+      )}
       <Routes>
         <Route path="/" element={user ? <Navigate to={isGuest ? "/guest" : "/profile"} /> : AuthPage}/>
         <Route path="/profile" element={user && !isGuest ? ProfilePage : <Navigate to="/" />} />
