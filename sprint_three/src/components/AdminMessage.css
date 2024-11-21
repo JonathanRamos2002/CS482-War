@@ -1,0 +1,59 @@
+.admin-message-container {
+    max-width: 600px;
+    margin: 1rem auto;
+    padding: 0 1rem;
+  }
+  
+  .message-display {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(185, 214, 255, 0.2);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .message-text {
+    color: #b9d6ff;
+    font-size: 1rem;
+    text-align: center;
+  }
+  
+  .admin-input {
+    display: flex;
+    gap: 0.5rem;
+  }
+  
+  .message-input {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    border: 1px solid rgba(185, 214, 255, 0.2);
+    background-color: rgba(0, 0, 0, 0.3); /* Darker background */
+    color: #b9d6ff;
+    -webkit-appearance: none; /* Remove default styling */
+    appearance: none; /* Remove default styling */
+}
+
+  .message-input:focus {
+    outline: none;
+    border-color: #4f83ff;
+  }
+  .message-input::placeholder {
+    color: rgba(185, 214, 255, 0.5); /* Lighter blue for placeholder text */
+}
+  
+  .send-button {
+    padding: 0.5rem 1rem;
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .send-button:hover {
+    background-color: #3a6fbf;
+  }
+
+  
