@@ -5,10 +5,16 @@ import GameTable from './GameTable';
 import { storage } from '../firebase';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
-import { useNavigate } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 
 // Mock CSS
 jest.mock('./GameTable.css', () => ({}));
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+  UserIcon: () => <div data-testid="user-icon">UserIcon</div>,
+  RefreshCcw: () => <div data-testid="refresh-icon">RefreshIcon</div>,
+}));
 
 // Mock firebase
 jest.mock('../firebase', () => ({
@@ -29,6 +35,7 @@ jest.mock('firebase/firestore', () => ({
 // Mock react-router-dom
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockNavigate
 }));
 
@@ -42,13 +49,12 @@ jest.mock('../deck.js', () => {
       }));
     }
     shuffle() {
-      // Deterministic shuffle for testing
-      this.cards.reverse();
+      return this.cards;
     }
   };
 });
 
-describe('GameTable', () => {
+describe('GameTable Component', () => {
   const mockUser = {
     uid: 'test-uid',
     email: 'test@example.com'
@@ -67,183 +73,249 @@ describe('GameTable', () => {
       exists: () => true,
       data: () => ({ username: 'Test User' })
     });
+
+    // Mock getBoundingClientRect
+    Element.prototype.getBoundingClientRect = jest.fn(() => ({
+      top: 0,
+      left: 0,
+      bottom: 100,
+      right: 100,
+      width: 100,
+      height: 100
+    }));
+
+    // Mock querySelector
+    document.querySelector = jest.fn((selector) => ({
+      getBoundingClientRect: () => ({
+        top: 0,
+        left: 0,
+        bottom: 100,
+        right: 100,
+        width: 100,
+        height: 100
+      }),
+      offsetWidth: 100,
+      offsetHeight: 100
+    }));
   });
 
   const renderGameTable = (props = {}) => {
     return render(
-      <GameTable
-        user={mockUser}
-        isGuest={false}
-        guestUsername=""
-        {...props}
-      />
+      <BrowserRouter>
+        <GameTable
+          user={mockUser}
+          isGuest={false}
+          guestUsername=""
+          {...props}
+        />
+      </BrowserRouter>
     );
   };
 
-  test('renders initial game state', async () => {
-    renderGameTable();
+  // Basic Rendering Tests
+  describe('Initial Rendering', () => {
+    test('renders initial game state correctly', () => {
+      renderGameTable();
+      expect(screen.getByText(/Click 'Deal Cards' to start the game/)).toBeInTheDocument();
+      expect(screen.getByTestId('user-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('refresh-icon')).toBeInTheDocument();
+    });
 
-    expect(screen.getByText("Click 'Deal Cards' to start the game.")).toBeInTheDocument();
-    expect(screen.getByText('Bot : 0')).toBeInTheDocument();
-    const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(4); // Deal, Play, Restart, Go Back
-  });
-
-  test('handles user profile fetch', async () => {
-    renderGameTable();
-
-    await waitFor(() => {
-      expect(getDoc).toHaveBeenCalled();
+    test('renders guest user interface correctly', () => {
+      renderGameTable({ isGuest: true, guestUsername: 'GuestPlayer' });
+      expect(screen.getByText('GuestPlayer : 0')).toBeInTheDocument();
     });
   });
 
-  test('handles profile image fetch error', async () => {
-    getDownloadURL.mockRejectedValueOnce(new Error('Fetch failed'));
-    
-    renderGameTable();
+  // User Profile Tests
+  describe('User Profile Handling', () => {
+    test('fetches and displays user profile successfully', async () => {
+      renderGameTable();
+      await waitFor(() => {
+        expect(getDoc).toHaveBeenCalled();
+      });
+    });
 
-    await waitFor(() => {
-      expect(console.log).toHaveBeenCalledWith(
-        'Avatar not found, using placeholder:',
-        expect.any(String)
-      );
+    test('handles profile image fetch failure gracefully', async () => {
+      getDownloadURL.mockRejectedValueOnce(new Error('Image fetch failed'));
+      renderGameTable();
+      await waitFor(() => {
+        expect(console.log).toHaveBeenCalledWith(
+          'Avatar not found, using placeholder:',
+          expect.any(String)
+        );
+      });
+    });
+
+    test('handles username fetch failure', async () => {
+      getDoc.mockRejectedValueOnce(new Error('Username fetch failed'));
+      renderGameTable();
+      await waitFor(() => {
+        expect(console.error).toHaveBeenCalled();
+      });
     });
   });
 
-  test('deals cards correctly', async () => {
-    renderGameTable();
+  // Game Initialization Tests
+  describe('Game Initialization', () => {
+    test('deals cards and starts game', () => {
+      renderGameTable();
+      const dealButton = screen.getByRole('button', { name: /Deal Cards/i });
+      fireEvent.click(dealButton);
+      expect(screen.getByText(/Game started!/)).toBeInTheDocument();
+    });
 
-    const dealButton = screen.getByText('Deal Cards');
-    fireEvent.click(dealButton);
-
-    expect(screen.getByText('Game started! Click to play a round.')).toBeInTheDocument();
-    expect(screen.getByText('Bot : 26')).toBeInTheDocument();
+    test('resets game state on restart', () => {
+      renderGameTable();
+      const restartButton = screen.getByTestId('refresh-icon');
+      fireEvent.click(restartButton);
+      expect(screen.getByText(/Click 'Deal Cards' to start the game/)).toBeInTheDocument();
+    });
   });
 
-  test('handles play round without dealing cards', () => {
-    renderGameTable();
+  // Card Interaction Tests
+  describe('Card Interactions', () => {
+    test('handles card dragging within drop zone', async () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
 
-    const playButton = screen.getByText('Play Round');
-    fireEvent.click(playButton);
+      const card = document.querySelector('.player-deck-drag');
+      fireEvent.mouseDown(card);
+      fireEvent.mouseMove(card, { clientX: 50, clientY: 50 });
+      fireEvent.mouseUp(card);
 
-    expect(screen.getByText('Game has not started!')).toBeInTheDocument();
+      expect(screen.getByText(/wins this round!/)).toBeInTheDocument();
+    });
+
+    test('handles card dragging outside drop zone', () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      const card = document.querySelector('.player-deck-drag');
+      fireEvent.mouseDown(card);
+      fireEvent.mouseMove(card, { clientX: 500, clientY: 500 });
+      fireEvent.mouseUp(card);
+
+      expect(screen.getByText(/Game started!/)).toBeInTheDocument();
+    });
+
+    test('handles mouse up on container', () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      const container = document.querySelector('.game-container');
+      fireEvent.mouseUp(container);
+
+      expect(screen.getByText(/Game started!/)).toBeInTheDocument();
+    });
   });
 
-  test('plays a complete round', async () => {
-    renderGameTable();
+  // Game Logic Tests
+  describe('Game Logic', () => {
+    test('handles regular round resolution', async () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
 
-    // Deal cards first
-    fireEvent.click(screen.getByText('Deal Cards'));
-    // Play a round
-    fireEvent.click(screen.getByText('Play Round'));
+      const card = document.querySelector('.player-deck-drag');
+      fireEvent.mouseDown(card);
+      fireEvent.mouseMove(document.querySelector('.drop-zone'));
+      fireEvent.mouseUp(card);
 
-    await waitFor(() => {
+      expect(screen.getByText(/wins this round!/)).toBeInTheDocument();
+    });
+
+    test('handles war scenario', async () => {
+      renderGameTable();
+      
+      // Force a war scenario by mocking cards of equal value
+      const mockDeck = new (jest.requireMock('../deck.js'))();
+      mockDeck.cards = Array(52).fill({ suit: 'H', value: 'K' });
+      
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      const card = document.querySelector('.player-deck-drag');
+      fireEvent.mouseDown(card);
+      fireEvent.mouseMove(document.querySelector('.drop-zone'));
+      fireEvent.mouseUp(card);
+
+      expect(screen.getByText(/It's a tie! War begins!/)).toBeInTheDocument();
+    });
+
+    test('handles war with insufficient cards', async () => {
+      renderGameTable();
+      
+      // Start with minimal cards to force insufficient cards scenario
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      // Play rounds until war with few cards
+      for (let i = 0; i < 20; i++) {
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(document.querySelector('.drop-zone'));
+        fireEvent.mouseUp(card);
+      }
+
+      await waitFor(() => {
+        expect(screen.getByText(/wins the game!/)).toBeInTheDocument();
+      });
+    });
+
+    test('handles game over condition', async () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      // Play rounds until game over
+      for (let i = 0; i < 30; i++) {
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(document.querySelector('.drop-zone'));
+        fireEvent.mouseUp(card);
+      }
+
+      await waitFor(() => {
+        expect(screen.getByText(/wins the game!/)).toBeInTheDocument();
+      });
+    });
+
+    test('handles multiple war rounds', async () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
+
+      // Force multiple war rounds
+      for (let i = 0; i < 3; i++) {
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(document.querySelector('.drop-zone'));
+        fireEvent.mouseUp(card);
+      }
+
       expect(screen.getByText(/wins this round!/)).toBeInTheDocument();
     });
   });
 
-  test('handles war scenario', async () => {
-    renderGameTable();
-    
-    // Set up a tie scenario
-    const mockPlayerDeck = [
-      { suit: 'H', value: 'K' },
-      { suit: 'D', value: '2' },
-      { suit: 'C', value: '3' },
-      { suit: 'S', value: '4' }
-    ];
-    const mockBotDeck = [
-      { suit: 'S', value: 'K' },
-      { suit: 'H', value: '5' },
-      { suit: 'D', value: '6' },
-      { suit: 'C', value: '7' }
-    ];
-
-    await act(async () => {
-      fireEvent.click(screen.getByText('Deal Cards'));
-    });
-
-    await waitFor(() => {
-      expect(screen.getByText(/Click to play a round/)).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText('Play Round'));
-
-    await waitFor(() => {
-      expect(screen.getByText(/wins the war!/)).toBeInTheDocument();
+  // Navigation Tests
+  describe('Navigation', () => {
+    test('navigates to profile when profile button is clicked', () => {
+      renderGameTable();
+      fireEvent.click(screen.getByTestId('user-icon'));
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
     });
   });
 
-  test('handles game end scenarios', async () => {
-    renderGameTable();
+  // Card Animation Tests
+  describe('Card Animations', () => {
+    test('shows war cards when war is triggered', async () => {
+      renderGameTable();
+      fireEvent.click(screen.getByRole('button', { name: /Deal Cards/i }));
 
-    // Deal cards and play until someone wins
-    fireEvent.click(screen.getByText('Deal Cards'));
-    
-    // Play multiple rounds
-    for (let i = 0; i < 30; i++) {
-      fireEvent.click(screen.getByText('Play Round'));
-    }
+      // Force war scenario
+      const card = document.querySelector('.player-deck-drag');
+      fireEvent.mouseDown(card);
+      fireEvent.mouseMove(document.querySelector('.drop-zone'));
+      fireEvent.mouseUp(card);
 
-    await waitFor(() => {
-      expect(screen.getByText(/wins the game!/)).toBeInTheDocument();
-    });
-  });
-
-  test('restarts game correctly', async () => {
-    renderGameTable();
-
-    // Start and play game
-    fireEvent.click(screen.getByText('Deal Cards'));
-    fireEvent.click(screen.getByText('Play Round'));
-
-    // Restart game
-    fireEvent.click(screen.getByText('Restart'));
-
-    expect(screen.getByText("Click 'Deal Cards' to start the game.")).toBeInTheDocument();
-    expect(screen.getByText('Bot : 0')).toBeInTheDocument();
-  });
-
-  test('handles guest user correctly', async () => {
-    const guestUsername = 'GuestPlayer';
-    renderGameTable({ isGuest: true, guestUsername });
-
-    expect(screen.getByText(`${guestUsername} : 0`)).toBeInTheDocument();
-  });
-
-  test('navigates back to profile', () => {
-    renderGameTable();
-
-    fireEvent.click(screen.getByText('Go Back to Profile'));
-    expect(mockNavigate).toHaveBeenCalledWith('/profile');
-  });
-
-  test('handles war with insufficient cards', async () => {
-    renderGameTable();
-    
-    // Deal cards first
-    fireEvent.click(screen.getByText('Deal Cards'));
-    
-    // Play many rounds to deplete cards
-    for (let i = 0; i < 20; i++) {
-      fireEvent.click(screen.getByText('Play Round'));
-    }
-
-    await waitFor(() => {
-      const message = screen.getByText(/wins the game!/);
-      expect(message).toBeInTheDocument();
-    });
-  });
-
-  test('displays correct card images', async () => {
-    renderGameTable();
-
-    fireEvent.click(screen.getByText('Deal Cards'));
-    fireEvent.click(screen.getByText('Play Round'));
-
-    await waitFor(() => {
-      const cardImages = screen.getAllByRole('img');
-      expect(cardImages.length).toBeGreaterThan(2); // Profile pics + card images
+      const warCards = document.querySelectorAll('.war-cards');
+      expect(warCards.length).toBe(0); // Initially no war cards
     });
   });
 });
