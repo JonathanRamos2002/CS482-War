@@ -19,7 +19,7 @@ const AdminMessage = ({ user }) => {
         
         if (userSnap.exists()) {
           setIsAdmin(userSnap.data().isAdmin === true);
-          console.log("Admin status:", userSnap.data().isAdmin);
+          console.log("Admin status:", userSnap.data().isAdmin); // THIS HIP TOO
         }
       } catch (error) {
         console.error("Error checking admin status:", error);
