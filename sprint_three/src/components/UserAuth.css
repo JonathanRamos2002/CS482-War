@@ -96,3 +96,65 @@ footer a {
 footer a:hover {
     color: #b9d6ff;
 }
+
+.ads-container {
+    position: fixed;
+    top: 10%; /* Adjust the vertical positioning */
+    bottom: 10%; /* Leave some space at the bottom */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    z-index: 10; /* Ensure ads are above the stars */
+  }
+  
+  .ads-container.left {
+    left: 2%; /* Add some padding from the left side */
+    width: 15%; /* Increase width for larger images */
+  }
+  
+  .ads-container.right {
+    right: 2%; /* Add some padding from the right side */
+    width: 15%; /* Increase width for larger images */
+  }
+  
+  .ad-image {
+    width: 100%; /* Make the image fill the container */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: contain; /* Contain the image within the container */
+    cursor: pointer;
+    border: none;
+  }
+  
+  .auth-container {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent; /* Ensure stars remain visible */
+  }
+  
+  .auth-content {
+    z-index: 5; /* Ensure content is above stars */
+    text-align: center;
+    background: rgba(0, 0, 0, 0.8); /* Semi-transparent background for better readability */
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  footer {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  
+  footer a {
+    color: #fff;
+    text-decoration: none;
+  }
+  
+  footer a:hover {
+    text-decoration: underline;
+  }
+  

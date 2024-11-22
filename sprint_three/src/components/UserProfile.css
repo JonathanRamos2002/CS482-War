@@ -72,3 +72,77 @@
     border-radius: 4px;
     margin: 5px; /* Add spacing between buttons */
 }
+
+.display-stats-button {
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 10px;
+}
+
+.stats-section {
+    background-color: transparent;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.ads-button {
+    background-color: #4f83ff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-left: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .ads-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .ads-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    border-radius: 8px;
+  }
+  
+  .ads-modal input {
+    display: block;
+    margin-bottom: 10px;
+    padding: 8px;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .ads-modal button {
+    padding: 10px 15px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .ads-modal button.close-modal-button {
+    background-color: #dc3545;
+  }
+  
+  .ads-modal button:disabled {
+    background-color: #6c757d;
+    cursor: not-allowed;
+  }
+  
