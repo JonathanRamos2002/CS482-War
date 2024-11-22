@@ -6,7 +6,8 @@ import './UserProfile.css';
 import { increment } from 'firebase/firestore';
 import { collection, addDoc } from 'firebase/firestore'; // For Firestore
 
-
+// BRETT : THIS IS HIP TOO, increments wins and this function is exported to jonathans GameTable, for when the user
+// runs out of cards it is called.
 // Increment wins dynamically
 export const incrementWins = async (db, currentUser) => {
   try {
