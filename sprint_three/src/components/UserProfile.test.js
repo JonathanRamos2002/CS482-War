@@ -1,9 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import UserProfile from './UserProfile';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import UserProfile, { incrementWins, incrementLosses } from './UserProfile';
 import { storage } from '../firebase';
-import { ref, getDownloadURL } from 'firebase/storage';
-import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getFirestore, doc, getDoc, updateDoc, setDoc, deleteDoc, collection, getDocs, increment } from 'firebase/firestore';
 import '@testing-library/jest-dom';
 
 // Mock CSS
@@ -14,259 +14,302 @@ jest.mock('../firebase', () => ({
   storage: {}
 }));
 
+// Mock all Firebase functions
 jest.mock('firebase/storage', () => ({
   ref: jest.fn(),
-  getDownloadURL: jest.fn()
+  getDownloadURL: jest.fn(),
+  uploadBytes: jest.fn()
 }));
 
 jest.mock('firebase/firestore', () => ({
   getFirestore: jest.fn(),
   doc: jest.fn(),
   getDoc: jest.fn(),
-  updateDoc: jest.fn()
+  updateDoc: jest.fn(),
+  setDoc: jest.fn(),
+  deleteDoc: jest.fn(),
+  collection: jest.fn(),
+  getDocs: jest.fn(),
+  increment: jest.fn(),
+  addDoc: jest.fn()
 }));
 
-describe('UserProfile Component', () => {
-  const mockUser = {
-    uid: 'test-uid',
-    email: 'test@example.com',
-    username: 'TestUser'
-  };
+describe('UserProfile Component and Functions', () => {
+  // Test Increment Functions
+  describe('Increment Functions', () => {
+    const mockDb = 'mock-db';
+    const mockUser = { uid: 'test-uid' };
 
-  const mockSetUser = jest.fn();
-  const mockSetSelectedImage = jest.fn();
-  const mockOnLogout = jest.fn();
+    beforeEach(() => {
+      jest.clearAllMocks();
+      console.error = jest.fn();
+      console.log = jest.fn();
+    });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    
-    // Mock successful profile image fetch
-    ref.mockReturnValue('mockStorageRef');
-    getDownloadURL.mockResolvedValue('mock-image-url');
-    
-    // Mock successful username fetch
-    getDoc.mockResolvedValue({
-      exists: () => true,
-      data: () => ({ username: 'TestUser' })
+    test('incrementWins with existing wins field', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ wins: 5, losses: 3 })
+      });
+
+      await incrementWins(mockDb, mockUser);
+
+      expect(updateDoc).toHaveBeenCalledWith(
+        undefined,
+        { wins: increment(1) }
+      );
+    });
+
+    test('incrementWins with undefined wins field', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ losses: 3 })
+      });
+
+      await incrementWins(mockDb, mockUser);
+
+      expect(updateDoc).toHaveBeenCalledTimes(2);
+    });
+
+    test('incrementLosses with existing losses field', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ wins: 5, losses: 3 })
+      });
+
+      await incrementLosses(mockDb, mockUser);
+
+      expect(updateDoc).toHaveBeenCalledWith(
+        undefined,
+        { losses: increment(1) }
+      );
+    });
+
+    test('incrementLosses with undefined losses field', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({ wins: 5 })
+      });
+
+      await incrementLosses(mockDb, mockUser);
+
+      expect(updateDoc).toHaveBeenCalledTimes(2);
+    });
+
+    test('handles non-existent user for incrementWins', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => false
+      });
+
+      await incrementWins(mockDb, mockUser);
+
+      expect(console.error).toHaveBeenCalledWith('User document does not exist.');
+    });
+
+    test('handles error in incrementWins', async () => {
+      getDoc.mockRejectedValueOnce(new Error('Database error'));
+
+      await incrementWins(mockDb, mockUser);
+
+      expect(console.error).toHaveBeenCalledWith('Error incrementing wins:', expect.any(Error));
     });
   });
 
-  test('renders user profile with fetched data', async () => {
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+  // Test UserProfile Component
+  describe('UserProfile Component', () => {
+    const mockUser = {
+      uid: 'test-uid',
+      email: 'test@example.com'
+    };
 
-    await waitFor(() => {
-      expect(screen.getByAltText('User Avatar')).toBeInTheDocument();
-      expect(screen.getByText(/Welcome, TestUser !/)).toBeInTheDocument();
-    });
-  });
+    const defaultProps = {
+      user: mockUser,
+      setUser: jest.fn(),
+      selectedImage: 'default-image.jpg',
+      setSelectedImage: jest.fn(),
+      onLogout: jest.fn()
+    };
 
-  test('handles profile image fetch error', async () => {
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
-    getDownloadURL.mockRejectedValueOnce(new Error('Fetch failed'));
-
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
-
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalled();
+    beforeEach(() => {
+      jest.clearAllMocks();
+      getDoc.mockResolvedValue({
+        exists: () => true,
+        data: () => ({
+          username: 'TestUser',
+          wins: 5,
+          losses: 3,
+          isAdmin: false
+        })
+      });
     });
 
-    consoleSpy.mockRestore();
-  });
+    // Stats Display Tests
+    test('displays and updates stats', async () => {
+      render(<UserProfile {...defaultProps} />);
 
-  test('handles username fetch error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    getDoc.mockRejectedValueOnce(new Error('Username fetch failed'));
+      // Click to show stats
+      fireEvent.click(screen.getByText('Display Stats'));
 
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
-
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(screen.getByText('Wins: 5')).toBeInTheDocument();
+        expect(screen.getByText('Losses: 3')).toBeInTheDocument();
+      });
     });
 
-    consoleSpy.mockRestore();
-  });
+    test('creates new stats document if none exists', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => false
+      });
 
-  test('enters edit mode and updates profile', async () => {
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+      render(<UserProfile {...defaultProps} />);
 
-    // Enter edit mode
-    fireEvent.click(screen.getByText('Update Profile'));
-    expect(screen.getByText('Update Your Profile')).toBeInTheDocument();
+      fireEvent.click(screen.getByText('Display Stats'));
 
-    // Update form fields
-    fireEvent.change(screen.getByLabelText('Username:'), {
-      target: { value: 'NewUsername' }
-    });
-    fireEvent.change(screen.getByLabelText('Email:'), {
-      target: { value: 'new@example.com' }
+      await waitFor(() => {
+        expect(setDoc).toHaveBeenCalledWith(
+          expect.anything(),
+          { wins: 0, losses: 0 },
+          { merge: true }
+        );
+      });
     });
 
-    // Submit form
-    updateDoc.mockResolvedValueOnce();
-    fireEvent.click(screen.getByText('Save Changes'));
+    // Admin Features Tests
+    test('handles admin features', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          username: 'TestUser',
+          isAdmin: true
+        })
+      });
 
-    await waitFor(() => {
-      expect(updateDoc).toHaveBeenCalled();
-      expect(mockSetUser).toHaveBeenCalled();
-    });
-  });
+      render(<UserProfile {...defaultProps} />);
 
-  test('handles update profile error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    updateDoc.mockRejectedValueOnce(new Error('Update failed'));
-
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
-
-    fireEvent.click(screen.getByText('Update Profile'));
-    fireEvent.click(screen.getByText('Save Changes'));
-
-    await waitFor(() => {
-      expect(consoleSpy).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(screen.getByText('Ads')).toBeInTheDocument();
+      });
     });
 
-    consoleSpy.mockRestore();
-  });
+    test('handles ad upload process', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          username: 'TestUser',
+          isAdmin: true
+        })
+      });
 
-  test('cancels profile edit', () => {
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+      getDocs.mockResolvedValueOnce({
+        docs: [{ ref: 'doc-ref' }]
+      });
 
-    fireEvent.click(screen.getByText('Update Profile'));
-    expect(screen.getByText('Update Your Profile')).toBeInTheDocument();
+      uploadBytes.mockResolvedValueOnce();
+      getDownloadURL.mockResolvedValueOnce('test-url');
 
-    fireEvent.click(screen.getByText('Cancel'));
-    expect(screen.queryByText('Update Your Profile')).not.toBeInTheDocument();
-  });
+      render(<UserProfile {...defaultProps} />);
 
-  test('handles logout confirmation flow', () => {
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+      // Open ads modal
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Ads'));
+      });
 
-    // Click logout button
-    fireEvent.click(screen.getByText('Log Out'));
-    expect(screen.getByText('Are you sure you want to log out?')).toBeInTheDocument();
+      // Set ad image and URL
+      const file = new File(['test'], 'test.png', { type: 'image/png' });
+      fireEvent.change(screen.getByAcceptText('image/*'), {
+        target: { files: [file] }
+      });
 
-    // Cancel logout
-    fireEvent.click(screen.getByText('Cancel'));
-    expect(screen.queryByText('Are you sure you want to log out?')).not.toBeInTheDocument();
+      fireEvent.change(screen.getByPlaceholderText('Enter Target URL'), {
+        target: { value: 'http://test.com' }
+      });
 
-    // Confirm logout
-    fireEvent.click(screen.getByText('Log Out'));
-    fireEvent.click(screen.getByText('Yes, Log Out'));
-    expect(mockOnLogout).toHaveBeenCalled();
-  });
+      // Upload ad
+      fireEvent.click(screen.getByText('Upload Ad'));
 
-  test('handles non-existent user data', async () => {
-    getDoc.mockResolvedValueOnce({
-      exists: () => false,
-      data: () => null
+      await waitFor(() => {
+        expect(uploadBytes).toHaveBeenCalled();
+        expect(deleteDoc).toHaveBeenCalled();
+      });
     });
 
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+    test('handles ad upload errors', async () => {
+      getDoc.mockResolvedValueOnce({
+        exists: () => true,
+        data: () => ({
+          username: 'TestUser',
+          isAdmin: true
+        })
+      });
 
-    await waitFor(() => {
-      expect(screen.getByText(`Welcome, ${mockUser.email} !`)).toBeInTheDocument();
+      uploadBytes.mockRejectedValueOnce(new Error('Upload failed'));
+
+      render(<UserProfile {...defaultProps} />);
+
+      await waitFor(() => {
+        fireEvent.click(screen.getByText('Ads'));
+      });
+
+      const file = new File(['test'], 'test.png', { type: 'image/png' });
+      fireEvent.change(screen.getByAcceptText('image/*'), {
+        target: { files: [file] }
+      });
+
+      fireEvent.change(screen.getByPlaceholderText('Enter Target URL'), {
+        target: { value: 'http://test.com' }
+      });
+
+      fireEvent.click(screen.getByText('Upload Ad'));
+
+      await waitFor(() => {
+        expect(console.error).toHaveBeenCalledWith('Error during ad upload process:', expect.any(Error));
+      });
     });
-  });
 
-  test('handles form input changes', () => {
-    render(
-      <UserProfile
-        user={mockUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+    // Profile Update Tests
+    test('handles profile update with all fields empty', async () => {
+      render(<UserProfile {...defaultProps} />);
 
-    fireEvent.click(screen.getByText('Update Profile'));
+      fireEvent.click(screen.getByText('Update Profile'));
+      fireEvent.change(screen.getByLabelText('Username:'), { target: { value: '' } });
+      fireEvent.change(screen.getByLabelText('Email:'), { target: { value: '' } });
+      fireEvent.click(screen.getByText('Save Changes'));
 
-    const usernameInput = screen.getByLabelText('Username:');
-    const emailInput = screen.getByLabelText('Email:');
+      await waitFor(() => {
+        expect(updateDoc).toHaveBeenCalledWith(
+          expect.anything(),
+          { username: '', email: '' }
+        );
+      });
+    });
 
-    fireEvent.change(usernameInput, { target: { value: 'NewUser' } });
-    fireEvent.change(emailInput, { target: { value: 'new@test.com' } });
+    // Error Handling Tests
+    test('handles getUserStats error', async () => {
+      getDoc.mockRejectedValueOnce(new Error('Stats fetch failed'));
 
-    expect(usernameInput.value).toBe('NewUser');
-    expect(emailInput.value).toBe('new@test.com');
-  });
+      render(<UserProfile {...defaultProps} />);
 
-  test('renders with minimal user data', () => {
-    const minimalUser = { uid: 'test-uid' };
-    
-    render(
-      <UserProfile
-        user={minimalUser}
-        setUser={mockSetUser}
-        selectedImage="default-image.jpg"
-        setSelectedImage={mockSetSelectedImage}
-        onLogout={mockOnLogout}
-      />
-    );
+      fireEvent.click(screen.getByText('Display Stats'));
 
-    expect(screen.getByAltText('User Avatar')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(console.error).toHaveBeenCalledWith('Error fetching or creating user stats:', expect.any(Error));
+      });
+    });
+
+    test('handles multiple profile image fetch attempts', async () => {
+      getDownloadURL.mockRejectedValueOnce(new Error('Fetch failed'));
+
+      const { rerender } = render(<UserProfile {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(getDownloadURL).toHaveBeenCalledTimes(1);
+      });
+
+      rerender(<UserProfile {...defaultProps} />);
+
+      await waitFor(() => {
+        expect(getDownloadURL).toHaveBeenCalledTimes(1); // Should not fetch again
+      });
+    });
   });
 });
