@@ -5,7 +5,7 @@ import { getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
 import './GameTable.css'; 
 import { useNavigate } from 'react-router-dom';
 import Deck from "../deck.js"
-import { UserIcon, RefreshCcw } from 'lucide-react';
+import { UserIcon, RefreshCcw, Play } from 'lucide-react';
 import { incrementWins, incrementLosses} from "./UserProfile.js"
 
 const CARD_VALUE_MAP = {
@@ -385,6 +385,10 @@ function GameTable({user, isGuest, guestUsername}) {
 
                 <button className='profile-button' onClick={restartGame}>
                     <RefreshCcw className='profile-icon'/>
+                </button>
+
+                <button className='profile-button' onClick={playRound}>
+                    <Play className='profile-icon'/>
                 </button>
                 
             </div>
