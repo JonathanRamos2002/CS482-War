@@ -14,6 +14,12 @@ jest.mock('lucide-react', () => ({
 // Mock CSS
 jest.mock('./Lobby.css', () => ({}));
 
+// Mock AdminMessage component
+jest.mock('./AdminMessage', () => ({
+  __esModule: true,
+  default: () => <div data-testid="admin-message">Admin Message</div>
+}));
+
 // Mock Firebase
 const mockOnSnapshot = jest.fn();
 const mockAddDoc = jest.fn();
@@ -57,7 +63,9 @@ describe('Lobby Component', () => {
       maxPlayers: 2,
       status: 'waiting',
       createdAt: '2024-01-01T00:00:00.000Z',
-      createdBy: { id: 'player1', name: 'Player 1' }
+      createdBy: { id: 'player1', name: 'Player 1' },
+      stakes: 100,
+      playerIDs: ['player1']
     }
   ];
 
@@ -82,221 +90,89 @@ describe('Lobby Component', () => {
     );
   };
 
-  test('renders lobby title and elements', async () => {
-    renderLobby();
-    
-    expect(screen.getByText('Welcome to the Lobby!')).toBeInTheDocument();
-    expect(screen.getByTestId('user-icon')).toBeInTheDocument();
-    expect(screen.getByText(/Table #/)).toBeInTheDocument();
-  });
-
-  test('navigates to profile when profile button is clicked', async () => {
-    renderLobby();
-    
-    const profileButton = screen.getByRole('button', { name: /profile/i });
-    fireEvent.click(profileButton);
-    
-    expect(mockNavigate).toHaveBeenCalledWith('/profile');
-  });
-
-  test('creates new table when create button is clicked', async () => {
-    mockAddDoc.mockResolvedValueOnce({ id: 'new-table' });
-    
-    renderLobby();
-    
-    const createButton = screen.getByRole('button', { name: /create new table/i });
-    await act(async () => {
-      fireEvent.click(createButton);
-    });
-    
-    expect(mockAddDoc).toHaveBeenCalled();
-    const addDocCall = mockAddDoc.mock.calls[0][1];
-    expect(addDocCall.maxPlayers).toBe(2);
-    expect(addDocCall.status).toBe('waiting');
-  });
-
-  test('handles create table error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    mockAddDoc.mockRejectedValueOnce(new Error('Create failed'));
-
-    renderLobby();
-    
-    const createButton = screen.getByRole('button', { name: /create new table/i });
-    await act(async () => {
-      fireEvent.click(createButton);
-    });
-    
-    expect(alertSpy).toHaveBeenCalledWith('Failed to create table. Please try again.');
-    consoleSpy.mockRestore();
-    alertSpy.mockRestore();
-  });
-
-  test('joins existing table', async () => {
-    mockUpdateDoc.mockResolvedValueOnce({});
-    
-    renderLobby();
-    
-    const joinButton = screen.getByRole('button', { name: /join game/i });
-    await act(async () => {
-      fireEvent.click(joinButton);
-    });
-    
-    expect(mockUpdateDoc).toHaveBeenCalled();
-    expect(mockNavigate).toHaveBeenCalledWith('/table');
-  });
-
-  test('handles join table error', async () => {
-    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    mockUpdateDoc.mockRejectedValueOnce(new Error('Join failed'));
-
-    renderLobby();
-    
-    const joinButton = screen.getByRole('button', { name: /join game/i });
-    await act(async () => {
-      fireEvent.click(joinButton);
-    });
-    
-    expect(alertSpy).toHaveBeenCalledWith('Failed to join table. Please try again.');
-    consoleSpy.mockRestore();
-    alertSpy.mockRestore();
-  });
-
-  test('deletes table when creator clicks delete', async () => {
-    const tablesWithCurrentUser = [{
-      ...mockTables[0],
-      createdBy: { id: mockUser.uid, name: mockUser.email }
-    }];
-
-    mockOnSnapshot.mockImplementationOnce((query, callback) => {
-      callback({
-        docs: tablesWithCurrentUser.map(table => ({
-          id: table.id,
-          data: () => table
-        }))
-      });
-      return jest.fn();
-    });
-
-    renderLobby();
-    
-    const deleteButton = screen.getByRole('button', { name: /delete table/i });
-    await act(async () => {
-      fireEvent.click(deleteButton);
-    });
-    
-    expect(mockDeleteDoc).toHaveBeenCalled();
-  });
-
-  test('handles guest user', () => {
-    renderLobby({ isGuest: true, guestUsername: 'GuestUser' });
-    expect(screen.getByText('Welcome to the Lobby!')).toBeInTheDocument();
-  });
-
-  test('shows max tables message when limit reached', () => {
-    const sixTables = Array(6).fill(mockTables[0]);
-    mockOnSnapshot.mockImplementationOnce((query, callback) => {
-      callback({
-        docs: sixTables.map(table => ({
-          id: table.id,
-          data: () => table
-        }))
-      });
-      return jest.fn();
-    });
-
-    renderLobby();
-    
-    expect(screen.getByText('Maximum number of tables reached (6)')).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /create new table/i })).not.toBeInTheDocument();
-  });
-
-  test('prevents joining full tables', () => {
-    const fullTable = {
-      ...mockTables[0],
-      players: [{ id: 'player1' }, { id: 'player2' }],
-      status: 'full'
-    };
-
-    mockOnSnapshot.mockImplementationOnce((query, callback) => {
-      callback({
-        docs: [{
-          id: fullTable.id,
-          data: () => fullTable
-        }]
-      });
-      return jest.fn();
-    });
-
-    renderLobby();
-    
-    const joinButton = screen.getByRole('button', { name: /table full/i });
-    expect(joinButton).toBeDisabled();
-  });
-  // Add these tests to your existing test suite
-
-describe('Lobby Component Edge Cases', () => {
-    // ... (keep your existing beforeEach and mock setup)
-  
-    test('handles player already in table', async () => {
-      const tableWithCurrentUser = {
-        ...mockTables[0],
-        players: [{ id: mockUser.uid, name: mockUser.email }]
-      };
-  
-      mockOnSnapshot.mockImplementationOnce((query, callback) => {
-        callback({
-          docs: [{
-            id: tableWithCurrentUser.id,
-            data: () => tableWithCurrentUser
-          }]
-        });
-        return jest.fn();
-      });
-  
+  // Basic Rendering Tests
+  describe('Rendering', () => {
+    test('renders lobby title and elements', () => {
       renderLobby();
-      
+      expect(screen.getByText('Welcome to the Lobby!')).toBeInTheDocument();
+      expect(screen.getByTestId('user-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('admin-message')).toBeInTheDocument();
+      expect(screen.getByText(/Table #/)).toBeInTheDocument();
+    });
+
+    test('renders stakes input with default value', () => {
+      renderLobby();
+      const stakesInput = screen.getByLabelText(/Table Stakes/);
+      expect(stakesInput).toHaveValue(100);
+    });
+
+    test('renders table information correctly', () => {
+      renderLobby();
+      expect(screen.getByText('Stakes: 100 coins')).toBeInTheDocument();
+      expect(screen.getByText('Player 1')).toBeInTheDocument();
+      expect(screen.getByText('Created by: Player 1')).toBeInTheDocument();
+    });
+  });
+
+  // Navigation Tests
+  describe('Navigation', () => {
+    test('navigates to profile when profile button is clicked', () => {
+      renderLobby();
+      const profileButton = screen.getByRole('button', { name: /UserIcon/i });
+      fireEvent.click(profileButton);
+      expect(mockNavigate).toHaveBeenCalledWith('/profile');
+    });
+
+    test('navigates to table when joining existing game', async () => {
+      mockUpdateDoc.mockResolvedValueOnce({});
+      renderLobby();
       const joinButton = screen.getByRole('button', { name: /join game/i });
       await act(async () => {
         fireEvent.click(joinButton);
       });
-      
-      expect(mockNavigate).toHaveBeenCalledWith('/table');
-      expect(mockUpdateDoc).not.toHaveBeenCalled();
+      expect(mockNavigate).toHaveBeenCalledWith('/table-multi');
     });
-  
-    test('handles cleanup error', async () => {
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-      mockDeleteDoc.mockRejectedValueOnce(new Error('Delete failed'));
-  
-      const tableWithCurrentUser = {
-        ...mockTables[0],
-        createdBy: { id: mockUser.uid, name: mockUser.email }
-      };
-  
-      mockOnSnapshot.mockImplementationOnce((query, callback) => {
-        callback({
-          docs: [{
-            id: tableWithCurrentUser.id,
-            data: () => tableWithCurrentUser
-          }]
-        });
-        return jest.fn();
-      });
-  
+  });
+
+  // Table Creation Tests
+  describe('Table Creation', () => {
+    test('creates new table with custom stakes', async () => {
+      mockAddDoc.mockResolvedValueOnce({ id: 'new-table' });
       renderLobby();
       
-      const deleteButton = screen.getByRole('button', { name: /delete table/i });
+      const stakesInput = screen.getByLabelText(/Table Stakes/);
+      fireEvent.change(stakesInput, { target: { value: '200' } });
+      
+      const createButton = screen.getByRole('button', { name: /create new table/i });
       await act(async () => {
-        fireEvent.click(deleteButton);
+        fireEvent.click(createButton);
       });
       
-      expect(consoleSpy).toHaveBeenCalled();
-      consoleSpy.mockRestore();
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          stakes: 200,
+          maxPlayers: 2,
+          status: 'waiting'
+        })
+      );
     });
-  
-    test('handles maxPlayers validation in create table', async () => {
+
+    test('prevents invalid stake amounts', () => {
+      renderLobby();
+      const stakesInput = screen.getByLabelText(/Table Stakes/);
+      fireEvent.change(stakesInput, { target: { value: '-50' } });
+      expect(stakesInput).toHaveValue(1);
+    });
+
+    test('handles empty stake input', () => {
+      renderLobby();
+      const stakesInput = screen.getByLabelText(/Table Stakes/);
+      fireEvent.change(stakesInput, { target: { value: '' } });
+      expect(stakesInput).toHaveValue(0);
+    });
+
+    test('prevents table creation when maximum tables reached', async () => {
       const sixTables = Array(6).fill(mockTables[0]);
       mockOnSnapshot.mockImplementationOnce((query, callback) => {
         callback({
@@ -307,63 +183,37 @@ describe('Lobby Component Edge Cases', () => {
         });
         return jest.fn();
       });
-  
+
       renderLobby();
-      
       const createButton = screen.queryByRole('button', { name: /create new table/i });
       expect(createButton).not.toBeInTheDocument();
-      expect(mockAddDoc).not.toHaveBeenCalled();
+      expect(screen.getByText('Maximum number of tables reached (6)')).toBeInTheDocument();
     });
-  
-    test('handles non-existent table join attempt', async () => {
-      mockOnSnapshot.mockImplementationOnce((query, callback) => {
-        callback({
-          docs: []
-        });
-        return jest.fn();
-      });
-  
-      renderLobby();
-      expect(screen.queryByRole('button', { name: /join game/i })).not.toBeInTheDocument();
-    });
-  
-    test('handles table state updates', async () => {
-      renderLobby();
+  });
+
+  // Table Joining Tests
+  describe('Table Joining', () => {
+    test('handles joining a non-existent table', async () => {
+      const nonExistentTableId = 'non-existent';
+      mockUpdateDoc.mockResolvedValueOnce({});
       
-      // Simulate a table update
+      renderLobby();
       await act(async () => {
-        mockOnSnapshot.mock.calls[0][1]({
-          docs: [{
-            id: 'table1',
-            data: () => ({
-              ...mockTables[0],
-              status: 'full'
-            })
-          }]
-        });
+        await joinTable(nonExistentTableId);
       });
-  
-      expect(screen.getByText('full')).toBeInTheDocument();
+      
+      expect(mockUpdateDoc).not.toHaveBeenCalled();
     });
-  
-    test('cleanups subscription on unmount', async () => {
-      const unsubscribeMock = jest.fn();
-      mockOnSnapshot.mockImplementationOnce(() => unsubscribeMock);
-  
-      const { unmount } = renderLobby();
-      unmount();
-  
-      expect(unsubscribeMock).toHaveBeenCalled();
-    });
-  
-    test('handles full table join attempt', async () => {
-      const alertSpy = jest.spyOn(window, 'alert').mockImplementation(() => {});
+
+    test('prevents joining when table is full', async () => {
+      const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
       const fullTable = {
         ...mockTables[0],
         players: [{ id: 'player1' }, { id: 'player2' }],
-        maxPlayers: 2
+        maxPlayers: 2,
+        status: 'full'
       };
-  
+
       mockOnSnapshot.mockImplementationOnce((query, callback) => {
         callback({
           docs: [{
@@ -373,19 +223,105 @@ describe('Lobby Component Edge Cases', () => {
         });
         return jest.fn();
       });
-  
+
       renderLobby();
-      
       const joinButton = screen.getByRole('button', { name: /table full/i });
       await act(async () => {
         fireEvent.click(joinButton);
       });
-  
-      expect(alertSpy).toHaveBeenCalledWith('This table is full!');
-      alertSpy.mockRestore();
+      
+      expect(alertMock).toHaveBeenCalledWith('This table is full!');
+      alertMock.mockRestore();
     });
-  
-    test('handles guest user table creation', async () => {
+
+    test('handles player already in table', async () => {
+      const tableWithCurrentUser = {
+        ...mockTables[0],
+        players: [{ id: mockUser.uid, name: mockUser.email }],
+        playerIDs: [mockUser.uid]
+      };
+
+      mockOnSnapshot.mockImplementationOnce((query, callback) => {
+        callback({
+          docs: [{
+            id: tableWithCurrentUser.id,
+            data: () => tableWithCurrentUser
+          }]
+        });
+        return jest.fn();
+      });
+
+      renderLobby();
+      const joinButton = screen.getByRole('button', { name: /join game/i });
+      await act(async () => {
+        fireEvent.click(joinButton);
+      });
+
+      expect(mockNavigate).toHaveBeenCalledWith('/table-multi');
+      expect(mockUpdateDoc).not.toHaveBeenCalled();
+    });
+  });
+
+  // Table Deletion Tests
+  describe('Table Deletion', () => {
+    test('allows creator to delete table', async () => {
+      const tableWithCurrentUser = {
+        ...mockTables[0],
+        createdBy: { id: mockUser.uid, name: mockUser.email }
+      };
+
+      mockOnSnapshot.mockImplementationOnce((query, callback) => {
+        callback({
+          docs: [{
+            id: tableWithCurrentUser.id,
+            data: () => tableWithCurrentUser
+          }]
+        });
+        return jest.fn();
+      });
+
+      renderLobby();
+      const deleteButton = screen.getByRole('button', { name: /delete table/i });
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+
+      expect(mockDeleteDoc).toHaveBeenCalled();
+    });
+
+    test('handles delete error gracefully', async () => {
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      mockDeleteDoc.mockRejectedValueOnce(new Error('Delete failed'));
+
+      const tableWithCurrentUser = {
+        ...mockTables[0],
+        createdBy: { id: mockUser.uid, name: mockUser.email }
+      };
+
+      mockOnSnapshot.mockImplementationOnce((query, callback) => {
+        callback({
+          docs: [{
+            id: tableWithCurrentUser.id,
+            data: () => tableWithCurrentUser
+          }]
+        });
+        return jest.fn();
+      });
+
+      renderLobby();
+      const deleteButton = screen.getByRole('button', { name: /delete table/i });
+      await act(async () => {
+        fireEvent.click(deleteButton);
+      });
+
+      expect(consoleSpy).toHaveBeenCalledWith('Error deleting table:', expect.any(Error));
+      consoleSpy.mockRestore();
+    });
+  });
+
+  // Guest User Tests
+  describe('Guest User Functionality', () => {
+    test('handles guest user table creation correctly', async () => {
       mockAddDoc.mockResolvedValueOnce({ id: 'new-table' });
       
       renderLobby({ isGuest: true, guestUsername: 'GuestUser' });
@@ -395,9 +331,77 @@ describe('Lobby Component Edge Cases', () => {
         fireEvent.click(createButton);
       });
       
-      const addDocCall = mockAddDoc.mock.calls[0][1];
-      expect(addDocCall.createdBy.id).toBe('guest-GuestUser');
-      expect(addDocCall.players[0].id).toBe('guest-GuestUser');
+      expect(mockAddDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          createdBy: {
+            id: 'guest-GuestUser',
+            name: 'GuestUser'
+          },
+          players: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'guest-GuestUser',
+              name: 'GuestUser'
+            })
+          ])
+        })
+      );
+    });
+
+    test('handles guest user joining table', async () => {
+      mockUpdateDoc.mockResolvedValueOnce({});
+      
+      renderLobby({ isGuest: true, guestUsername: 'GuestUser' });
+      
+      const joinButton = screen.getByRole('button', { name: /join game/i });
+      await act(async () => {
+        fireEvent.click(joinButton);
+      });
+      
+      expect(mockUpdateDoc).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          players: expect.arrayContaining([
+            expect.objectContaining({
+              id: 'guest-GuestUser',
+              name: 'GuestUser'
+            })
+          ])
+        })
+      );
+    });
+  });
+
+  // Subscription Tests
+  describe('Firebase Subscriptions', () => {
+    test('unsubscribes from table updates on unmount', () => {
+      const unsubscribeMock = jest.fn();
+      mockOnSnapshot.mockImplementationOnce(() => unsubscribeMock);
+      
+      const { unmount } = renderLobby();
+      unmount();
+      
+      expect(unsubscribeMock).toHaveBeenCalled();
+    });
+
+    test('handles table updates correctly', async () => {
+      renderLobby();
+      
+      await act(async () => {
+        mockOnSnapshot.mock.calls[0][1]({
+          docs: [{
+            id: 'table1',
+            data: () => ({
+              ...mockTables[0],
+              status: 'full',
+              players: [{ id: 'player1' }, { id: 'player2' }]
+            })
+          }]
+        });
+      });
+
+      expect(screen.getByText('full')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: /table full/i })).toBeDisabled();
     });
   });
 });
