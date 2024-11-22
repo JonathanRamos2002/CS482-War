@@ -2,10 +2,17 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import GameTableMultiplayer from './GameTableMultiplayer';
-import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc, onSnapshot, collection, query, where, getDocs } from 'firebase/firestore';
 import { storage } from '../firebase.js';
 import { ref, getDownloadURL } from 'firebase/storage';
 import { BrowserRouter } from 'react-router-dom';
+import { act } from 'react-dom/test-utils';
+
+// Mock lucide-react icons
+jest.mock('lucide-react', () => ({
+    UserIcon: () => <div data-testid="user-icon">UserIcon</div>,
+    Rocket: () => <div data-testid="rocket-icon">Rocket</div>
+}));
 
 // Mock CSS
 jest.mock('./GameTableMultiplayer.css', () => ({}));
@@ -21,6 +28,7 @@ jest.mock('firebase/firestore', () => ({
     getFirestore: jest.fn(() => 'mock-db'),
     doc: jest.fn(),
     getDoc: jest.fn(),
+    getDocs: jest.fn(),
     updateDoc: jest.fn(),
     onSnapshot: jest.fn(() => jest.fn()),
     collection: jest.fn(),
@@ -86,12 +94,19 @@ describe('GameTableMultiplayer Component', () => {
         console.log = jest.fn();
         
         // Setup default mocks
+        const mockQuerySnapshot = {
+            empty: false,
+            docs: [{
+                id: 'table1',
+                data: () => mockGameDoc
+            }]
+        };
+
+        getDocs.mockResolvedValue(mockQuerySnapshot);
         onSnapshot.mockImplementation((query, callback) => {
             callback({
-                forEach: (fn) => fn({
-                    id: mockGameDoc.id,
-                    data: () => mockGameDoc
-                })
+                exists: () => true,
+                data: () => mockGameDoc
             });
             return () => {};
         });
@@ -104,20 +119,128 @@ describe('GameTableMultiplayer Component', () => {
         updateDoc.mockResolvedValue(undefined);
     });
 
-    test('handles missing user data', () => {
+    // Basic Rendering Tests
+    test('renders initial game state correctly', () => {
         render(
             <BrowserRouter>
-                <GameTableMultiplayer user1={null} />
+                <GameTableMultiplayer user1={user1} />
             </BrowserRouter>
         );
-        expect(console.log).toHaveBeenCalledWith('not logged in!');
+        expect(screen.getByTestId('user-icon')).toBeInTheDocument();
+        expect(screen.getByTestId('rocket-icon')).toBeInTheDocument();
     });
 
-    test('handles database query error', async () => {
-        onSnapshot.mockImplementationOnce((query, callback, errorCallback) => {
-            errorCallback(new Error('Database error'));
-            return () => {};
+    // Navigation Tests
+    test('navigates to profile when profile button clicked', () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+        fireEvent.click(screen.getByTestId('user-icon'));
+        expect(mockNavigate).toHaveBeenCalledWith('/profile');
+    });
+
+    test('navigates to lobby when rocket button clicked', () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+        fireEvent.click(screen.getByTestId('rocket-icon'));
+        expect(mockNavigate).toHaveBeenCalledWith('/lobby');
+    });
+
+    // Card Dragging Tests
+    test('handles card dragging', async () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(card, { clientX: 100, clientY: 100 });
+        fireEvent.mouseUp(card);
+        
+        await waitFor(() => {
+            expect(updateDoc).toHaveBeenCalled();
         });
+    });
+
+    // Game State Tests
+    test('begins game when host clicks deal', async () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        const dealButton = screen.getByRole('button', { name: /Deal Cards/i });
+        await act(async () => {
+            fireEvent.click(dealButton);
+        });
+
+        expect(updateDoc).toHaveBeenCalledWith(
+            expect.anything(),
+            expect.objectContaining({
+                status: 'game started'
+            })
+        );
+    });
+
+    test('handles player card setting', async () => {
+        const mockTableDoc = {
+            exists: () => true,
+            data: () => ({
+                players: [
+                    { id: user1.uid, deck: [{ suit: 'H', value: 'K' }], currentCard: null },
+                    { id: 'user2-uid', deck: [{ suit: 'C', value: '2' }], currentCard: null }
+                ]
+            })
+        };
+
+        getDoc.mockResolvedValueOnce(mockTableDoc);
+
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(document.querySelector('.drop-zone'));
+        fireEvent.mouseUp(card);
+
+        await waitFor(() => {
+            expect(updateDoc).toHaveBeenCalled();
+        });
+    });
+
+    // Error Handling Tests
+    test('handles missing database reference', async () => {
+        getFirestore.mockImplementationOnce(() => null);
+
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        const card = document.querySelector('.player-deck-drag');
+        fireEvent.mouseDown(card);
+        fireEvent.mouseMove(document.querySelector('.drop-zone'));
+        fireEvent.mouseUp(card);
+
+        expect(console.error).toHaveBeenCalledWith(
+            expect.stringContaining('Database, game document, or user data is missing')
+        );
+    });
+
+    test('handles empty query result', async () => {
+        getDocs.mockResolvedValueOnce({ empty: true, docs: [] });
 
         render(
             <BrowserRouter>
@@ -126,51 +249,23 @@ describe('GameTableMultiplayer Component', () => {
         );
 
         await waitFor(() => {
-            expect(console.error).toHaveBeenCalledWith('Error fetching documents: ', expect.any(Error));
+            expect(console.log).toHaveBeenCalledWith('No matching document found.');
         });
     });
 
-    test('handles profile image fetch error', async () => {
-        getDownloadURL.mockRejectedValueOnce(new Error('Image fetch failed'));
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        await waitFor(() => {
-            expect(console.error).toHaveBeenCalledWith('Avatar not found, using placeholder:', expect.any(String));
-        });
-    });
-
-    test('handles WAR scenario', async () => {
-        const warGameDoc = {
+    // Game Logic Tests
+    test('handles player 1 winning round', async () => {
+        const winningGameDoc = {
             ...mockGameDoc,
             players: [
-                {
-                    id: 'user1-uid',
-                    score: 26,
-                    deck: Array(10).fill({ suit: 'H', value: 'K' }),
-                    currentCard: { suit: 'H', value: 'K' }
-                },
-                {
-                    id: 'user2-uid',
-                    score: 26,
-                    deck: Array(10).fill({ suit: 'D', value: 'K' }),
-                    currentCard: { suit: 'D', value: 'K' }
-                }
+                { ...mockGameDoc.players[0], currentCard: { suit: 'H', value: 'K' } },
+                { ...mockGameDoc.players[1], currentCard: { suit: 'H', value: '2' } }
             ]
         };
 
-        onSnapshot.mockImplementationOnce((query, callback) => {
-            callback({
-                forEach: (fn) => fn({
-                    id: warGameDoc.id,
-                    data: () => warGameDoc
-                })
-            });
-            return () => {};
+        getDoc.mockResolvedValueOnce({
+            exists: () => true,
+            data: () => winningGameDoc
         });
 
         render(
@@ -179,168 +274,127 @@ describe('GameTableMultiplayer Component', () => {
             </BrowserRouter>
         );
 
-        fireEvent.click(screen.getByText(/Play Round/i));
+        await act(async () => {
+            mockGameDoc.status = "both ready";
+            onSnapshot.mock.calls[0][1]({
+                exists: () => true,
+                data: () => ({ ...mockGameDoc, status: "both ready" })
+            });
+        });
 
         await waitFor(() => {
-            expect(screen.getByText(/WAR!/i)).toBeInTheDocument();
+            expect(updateDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    status: expect.stringContaining('host wins')
+                })
+            );
         });
     });
 
-    test('handles WAR with insufficient cards', async () => {
-        const shortDeckGameDoc = {
+    test('handles game over condition', async () => {
+        const gameOverDoc = {
             ...mockGameDoc,
             players: [
-                {
-                    id: 'user1-uid',
-                    score: 2,
-                    deck: [{ suit: 'H', value: 'K' }, { suit: 'D', value: 'K' }],
-                    currentCard: { suit: 'H', value: 'K' }
-                },
-                {
-                    id: 'user2-uid',
-                    score: 26,
-                    deck: Array(10).fill({ suit: 'D', value: 'K' }),
-                    currentCard: { suit: 'D', value: 'K' }
-                }
+                { ...mockGameDoc.players[0], deck: [], currentCard: { suit: 'H', value: 'K' } },
+                { ...mockGameDoc.players[1], currentCard: { suit: 'H', value: '2' } }
             ]
         };
 
-        onSnapshot.mockImplementationOnce((query, callback) => {
-            callback({
-                forEach: (fn) => fn({
-                    id: shortDeckGameDoc.id,
-                    data: () => shortDeckGameDoc
-                })
+        getDoc.mockResolvedValueOnce({
+            exists: () => true,
+            data: () => gameOverDoc
+        });
+
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        await act(async () => {
+            mockGameDoc.status = "both ready";
+            onSnapshot.mock.calls[0][1]({
+                exists: () => true,
+                data: () => ({ ...mockGameDoc, status: "both ready" })
             });
-            return () => {};
         });
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        fireEvent.click(screen.getByText(/Play Round/i));
 
         await waitFor(() => {
-            expect(screen.getByText(/ran out cards during war/i)).toBeInTheDocument();
-        });
-    });
-
-    test('handles empty deck game over', async () => {
-        const emptyDeckGameDoc = {
-            ...mockGameDoc,
-            players: [
-                {
-                    id: 'user1-uid',
-                    score: 0,
-                    deck: [],
-                    currentCard: null
-                },
-                {
-                    id: 'user2-uid',
-                    score: 52,
-                    deck: [{ suit: 'H', value: 'K' }],
-                    currentCard: { suit: 'H', value: 'K' }
-                }
-            ]
-        };
-
-        onSnapshot.mockImplementationOnce((query, callback) => {
-            callback({
-                forEach: (fn) => fn({
-                    id: emptyDeckGameDoc.id,
-                    data: () => emptyDeckGameDoc
+            expect(updateDoc).toHaveBeenCalledWith(
+                expect.anything(),
+                expect.objectContaining({
+                    status: expect.stringContaining('game over')
                 })
+            );
+        });
+    });
+
+    // Component Lifecycle Tests
+    test('unsubscribes from Firebase listener on unmount', () => {
+        const unsubscribe = jest.fn();
+        onSnapshot.mockReturnValueOnce(unsubscribe);
+
+        const { unmount } = render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        unmount();
+        expect(unsubscribe).toHaveBeenCalled();
+    });
+
+    // Profile Picture Handling Tests
+    test('handles profile picture updates', async () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        await waitFor(() => {
+            const profilePics = screen.getAllByAltText(/avatar/i);
+            expect(profilePics[0]).toHaveAttribute('src', 'mock-avatar-url');
+        });
+    });
+
+    test('handles profile picture fetch error gracefully', async () => {
+        getDownloadURL.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
+
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        await waitFor(() => {
+            expect(console.error).toHaveBeenCalledWith(
+                expect.stringContaining('Failed to fetch avatar for UID'),
+                expect.any(Error.message)
+            );
+        });
+    });
+
+    // Card Animation Tests
+    test('handles card removal animation', async () => {
+        render(
+            <BrowserRouter>
+                <GameTableMultiplayer user1={user1} />
+            </BrowserRouter>
+        );
+
+        await act(async () => {
+            mockGameDoc.status = "both ready";
+            onSnapshot.mock.calls[0][1]({
+                exists: () => true,
+                data: () => ({ ...mockGameDoc, status: "both ready" })
             });
-            return () => {};
         });
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        fireEvent.click(screen.getByText(/Play Round/i));
 
         await waitFor(() => {
-            expect(screen.getByText(/Game over!/i)).toBeInTheDocument();
-        });
+            const cards = document.querySelectorAll('.removing');
+            expect(cards.length).toBeGreaterThan(0);
+        }, { timeout: 2000 });
     });
-
-    test('handles non-existent table document', async () => {
-        getDoc.mockImplementationOnce(() => Promise.resolve({
-            exists: () => false
-        }));
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        const dealButton = screen.getByText('Deal Cards');
-        fireEvent.click(dealButton);
-
-        await waitFor(() => {
-            expect(console.error).toHaveBeenCalledWith('Table document not found');
-        });
-    });
-
-    test('handles database update error', async () => {
-        updateDoc.mockRejectedValueOnce(new Error('Update failed'));
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        fireEvent.click(screen.getByText(/Play Round/i));
-
-        await waitFor(() => {
-            expect(console.error).toHaveBeenCalledWith('Error updating game data in Firestore:', expect.any(Error));
-        });
-    });
-
-    test('handles username fetch error', async () => {
-        getDoc.mockRejectedValueOnce(new Error('Username fetch failed'));
-
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-
-        await waitFor(() => {
-            expect(console.error).toHaveBeenCalledWith('error getting username of', expect.any(String), expect.any(Error));
-        });
-    });
-
-    test('renders without error', () => {
-        render(
-            <BrowserRouter>
-                <GameTableMultiplayer user1={user1} />
-            </BrowserRouter>
-        );
-        expect(screen.getByText(/Waiting for opponent/i)).toBeInTheDocument();
-        expect(screen.getByText(/Deal Cards/i)).toBeInTheDocument();
-        expect(screen.getByText(/Play Round/i)).toBeInTheDocument(); 
-    });
-
-    test('starts new game when Deal Cards clicked', async () => {
-      render(
-          <BrowserRouter>
-              <GameTableMultiplayer user1={user1} />
-          </BrowserRouter>
-      );
-      
-      fireEvent.click(screen.getByText(/Deal Cards/i));
-
-      await waitFor(() => {
-        expect(updateDoc).toHaveBeenCalled();
-      })
-    })
 });
