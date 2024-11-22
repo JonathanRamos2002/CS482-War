@@ -167,7 +167,7 @@ function GameTable({user, isGuest, guestUsername}) {
          setGameMessage("Game started! Click to play a round.");
     };
  
-    // Play a single round
+    // THIS IS HIP TOO - Jonathan : this updated game logic handles back-to-back war in the case that two players happen to tie again after a tie
     const playRound = () => {
         if (!playerDeck || !botDeck || playerDeck.length === 0 || botDeck.length === 0) {
             if (playerDeck.length > 0) {
