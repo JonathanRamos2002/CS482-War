@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {storage} from '../firebase';
 import {ref, getDownloadURL} from 'firebase/storage';
-import { getFirestore, doc, getDoc} from 'firebase/firestore';
+import { getFirestore, doc, getDoc, updateDoc} from 'firebase/firestore';
 import './GameTable.css'; 
 import { useNavigate } from 'react-router-dom';
 import Deck from "../deck.js"
 import { UserIcon, RefreshCcw } from 'lucide-react';
+import { incrementWins, incrementLosses} from "./UserProfile.js"
 
 const CARD_VALUE_MAP = {
     "2": 2,
@@ -146,6 +147,7 @@ function GameTable({user, isGuest, guestUsername}) {
          getUsername();
      }, [db, imageFetched, user, isGuest]);
 
+
     const restartGame = () => {
         setPlayerDeck(null);
         setBotDeck(null);
@@ -168,7 +170,13 @@ function GameTable({user, isGuest, guestUsername}) {
     // Play a single round
     const playRound = () => {
         if (!playerDeck || !botDeck || playerDeck.length === 0 || botDeck.length === 0) {
-            setGameMessage(playerDeck.length > 0 ? "You win the game!" : "Bot wins the game!");
+            if (playerDeck.length > 0) {
+                setGameMessage("You win the game!");
+                incrementWins(db, user);
+            } else {
+                setGameMessage("Bot wins the game!");
+                incrementLosses(db, user);
+            }
             return;
         }
     
@@ -178,7 +186,13 @@ function GameTable({user, isGuest, guestUsername}) {
             const botWarCards = botDeck.splice(0, Math.min(4, botDeck.length));
     
             if (playerWarCards.length < 4 || botWarCards.length < 4) {
-                setGameMessage(playerDeck.length > botDeck.length ? "You win the game!" : "Bot wins the game!");
+                if (playerDeck.length > botDeck.length) {
+                    setGameMessage("You win the game!");
+                    incrementWins(db, user);
+                } else {
+                    setGameMessage("Bot wins the game!");
+                    incrementLosses(db, user);
+                }
                 return;
             }
     

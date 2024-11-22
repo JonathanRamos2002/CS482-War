@@ -49,8 +49,7 @@
 .chat-input-container {
   display: flex;
   padding: 10px;
-  background-color: #eeeeee;
-  border-top: 1px solid #dddddd;
+  background: transparent;
 }
 
 .chat-input {
@@ -93,6 +92,6 @@
 }
 
 .close-chat:hover {
-  background-color: #f0f0f0;
+  background: transparent;
 }
 
