@@ -6,30 +6,27 @@
 %Remember a picture is worth a thousand words! ]]
 
 \subsection{Architecture}
-We are planning on implementing a Model View Controller (MVC) architecture type for our game. It will be able to handle our in-game logic and how the user interacts with the game itself.
-The Model typically will represent the game logic, deck and cards. The View will be responsible for representing the current state of the game to the user. Examples of this are displaying the players stats, profile and friends, having the ability to view output of cards/deck and showing tables in the lobby. We will be using a graphical feature to show this in our project. The Controller will handle user input for various commands like starting the game, ending the game, placing cards, party privacy and updating the players profile settings.
+Initially, we planned to implement a traditional Model-View-Controller (MVC) architecture for our project, but due to React's component based nature, we adjusted our approach to better align with its framework. Instead of strictly adhering to MVC, we designed the architecture to leverage React's modular and reusable components. Each component in our project encapsulates specific functionality and is responsible for managing its own logic, user interactions, and html. These components return HTML like JS code, which is dynamically rendered and combined to form the user interface. The App.js file serves as the central hub of the application, acting somewhat like a controller in a traditional MVC setup. It orchestrates the application by importing and rendering the various components based on the user's interactions and the current application state. Moreover, the React-based approach blends the Model and View into individual components. For instance, GameTable.js manages the game logic (model) while simultaneously rendering the game table (view) to the user. While this architecture differs from a strict MVC implementation, it retains the core benefits of modularity and scalability.
 
 \subsection{Technologies}
-Since we are developing a web-based version of the card game ``War", we have decided to use modern web technologies to ensure we have a responsive and scale-able application. Our front end will consist of common technologies used for web development, HTML, CSS, and Javascript. HTML will provide the basic structure of the web page, and CSS will allow us to style the page according to the theme specified by Cosmic Radiance. Javascript will handle game logic on the client side. Our front-end framework will be React.js as this will facilitate with updating the game-state without refreshing the page. React will also help with creating reusable components such as the cards themselves. 
+Since we developed a web-based version of the card game "War," we decided to use modern web technologies to create a responsive and scalable application. Our front end consisted of common web development technologies: HTML, CSS, and JavaScript. HTML provided the basic structure of the web page, while CSS allowed us to style the page according to the theme specified by Cosmic Radiance. JavaScript handled the game logic on the client side. We used React.js as our front-end framework to facilitate updating the game state without refreshing the page. React also helped us create reusable components, such as the cards themselves.
+Our back end handled the game logic, player data, and real-time communication. We used Node.js to manage game logic outside of the browser, which enabled us to handle requests like determining winners.
+To store user data, game history, and player stats, we needed persistent storage. We chose Firebase for this purpose due to its ease of use with real-time updates. Firebase provided a flexible schema compared to SQL databases, which require defined relationships among tables. It also included built-in authentication, supporting Google and Facebook sign-ins as well as traditional email and password login. Overall, Firebase met our needs for real-time updates, scalability, security, and rapid development.
 
-Our back end will need to handle the game logic, player data, and real-time communication. Node.js will allow us to handle game logic outside of the browser. This will allow us the necessary means of handling requests such as determining winners. We will use a library Socket.io to handle real-time communication between multiple clients. 
 
-To store our user data, game history, and player stats we will need persistent storage. We have chosen Firebase as our persistent storage due to its ease of use with real-time updates. It will also allow us to have a more flexible schema as SQL databases require relations among the tables created. Firebase also includes built-in authentication, supporting Google and Facebook sign in, as well as traditional email and password. Overall, Firebase supports our needs of real-time updates, scalability, security, and rapid development. 
 
-\subsection{Persistent Storage}
-Our database is composed of three main firebase components, Authentication, Firestore, and Storage. Each of these components is responsible for storing different types of information for each user. The authentication component is responsible for storing user login information, in our application this is the email and password of every user. Importantly, the Authentication component hashes passwords with a built-in function which improves security for our users. The storage component is responsible for storing the profile images of every user. The profile picture uploaded by the user is saved to the storage component under `avatars/user.uid' in which the current user's id is used as the filename. The majority of our user's data will be saved in the Firestore component. The data will be organized as JSON documents which are then organized into collections. The user's information such as, username, friends, stats, and profile picture URL will be saved into a document appropriately titled as the `user.uid'. Each user will require their own document, and all user documents will be stored in the `users' collection. This structure is flexible, making it scale-able which is important for an online multiplayer game. Our NoSQL design ensures that we can continue adding more collections and documents as needed without restructuring the entire database.
 
 \subsection{Coding Standards}
-Our database naming scheme will consist of singular, lowercase names for collections (user, leaderboard). Each attribute within documents will use camelCase (userName, gameStats, gameID). Variables and functions in JavaScript should also be written in camelCase. 
+Our database naming scheme consisted of singular, lowercase names for collections (user, leaderboard). Each attribute within documents used camelCase (userName, gameStats, gameID). Variables and functions in JavaScript were also written in camelCase.
 
-We will format our code using two spaces for indentation. Brackets should be used on the same line for functions and other control statements. Inline commenting should be used only to explain complex logic. Multi line comments should be used to describe functions and classes. Additionally, all functions should be properly documented with a multi-line comment describing the purpose, parameters, and return value. 
+We formatted our code using two spaces for indentation. Brackets were placed on the same line for functions and other control statements. Inline comments were used only to explain complex logic, while multi-line comments were used to describe functions and classes. Additionally, all functions were properly documented with a multi-line comment describing their purpose, parameters, and return value.
 
-Testing standards will consist of test-driven development. We will ensure proper functionality by ensuring that all code commits pass necessary code tests before merging. Code tests should handle correctness, edge cases, and performance. 
+Our testing standards followed a test-driven development approach. We ensured proper functionality by requiring all code commits to pass necessary code tests before merging. These tests accounted for correctness, edge cases, and performance.
 
 \subsection{UML Diagram}
 \begin{figure}
     \centering
-    \includegraphics[width=1\linewidth]{figures/WarUML.png}
+    \includegraphics[width=1\linewidth]{figures/finalUML.png}
     \caption{UML diagram outlining the war card game for Cosmic Radiance}
     \label{fig:enter-label}
 \end{figure}
@@ -41,28 +38,8 @@ Testing standards will consist of test-driven development. We will ensure proper
     \label{fig:enter-label}
 \end{figure}
 
-The system features a Host class that extends the player class, granting the host control over the table, including decisions on who can join. Additionally, a Game class manages the gameplay mechanics, ensuring that the rules of the game are followed. The User Account class manages all of the information of the User, from their password to avatar, to their friends. Lastly, a table class is made to allow users to join the table or create their own table.
+This UML diagram illustrates the component-based architecture of the War card game application. It highlights the relationships between classes, such as App.js, which orchestrates key components like UserAuth.js, GameTable.js, and Lobby.js. The diagram also shows the methods and interactions within each class.
 
-\subsection {UI Mockups}
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{figures/Welcome Page UI.png}
-    \caption{The UI design for Cosmic Radiance web app's welcome screen features a space-themed layout with royal blue tones.}
-    \label{fig:enter-label}
-\end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{figures/Lobby UI.jpeg}
-    \caption{Lobby UI.}
-    \label{fig:enter-label}
-\end{figure}
-
-\begin{figure}
-    \centering
-    \includegraphics[width=1\linewidth]{figures/Login UI.jpeg}
-    \caption{Login Screen for Cosmic Radiance War Game.}
-    \label{fig:enter-label}
-\end{figure}
 
 
